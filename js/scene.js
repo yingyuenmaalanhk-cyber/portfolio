@@ -734,6 +734,29 @@ export function buildScene(container, opts = {}) {
   saveBox.userData.rootLamp = true;
   registerHotspot(saveBox, 'lamp');
 
+  /* --- hotspot anchors projected to screen for floating HTML labels --- */
+  const anchors = {
+    monitor: new THREE.Vector3(-0.12, DESK_Y + 0.74, 0.02),
+    keyboard: new THREE.Vector3(0.06, DESK_Y + 0.16, 0.52),
+    card: new THREE.Vector3(0.56, DESK_Y + 0.14, 0.55),
+    board: new THREE.Vector3(-0.24, DESK_Y + 0.12, 0.58),
+    photos: new THREE.Vector3(-0.66, DESK_Y + 0.14, 0.30),
+  };
+  const onProject = opts.onProject || (() => {});
+  const projV = new THREE.Vector3();
+  function projectHotspots() {
+    const out = {};
+    for (const id in anchors) {
+      projV.copy(anchors[id]).project(camera);
+      out[id] = {
+        x: (projV.x * 0.5 + 0.5) * window.innerWidth,
+        y: (-projV.y * 0.5 + 0.5) * window.innerHeight,
+        visible: projV.z < 1 && projV.z > -1,
+      };
+    }
+    onProject(out);
+  }
+
   function pick(e) {
     ndc.x = (e.clientX / window.innerWidth) * 2 - 1;
     ndc.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -812,6 +835,7 @@ export function buildScene(container, opts = {}) {
   const clock = new THREE.Clock();
   let raf = 0;
   let running = true;
+  let projAcc = 1; // project labels on the first frame
 
   function tick() {
     raf = requestAnimationFrame(tick);
@@ -837,6 +861,9 @@ export function buildScene(container, opts = {}) {
 
     crt.update(motionOn ? dt : 0, motionOn);
     applyCamera();
+
+    projAcc += dt;
+    if (projAcc > 0.12) { projAcc = 0; projectHotspots(); }
 
     if (motionOn) {
       // dust drift
