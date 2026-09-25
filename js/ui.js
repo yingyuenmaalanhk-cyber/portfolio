@@ -8,6 +8,7 @@
 import {
   PROFILE, STICKY_NOTES, TIMELINE_AWARDS, SKILL_PAGES, PROJECTS,
   AWARD_TABS, PHOTOS, CONTACTS, BOOT_LINES, BOOT_HINT,
+  APPS, WELCOME, TOUR, JOURNEY,
 } from './content.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -17,6 +18,7 @@ export const state = {
   lang: localStorage.getItem('my-lang') || 'en', // 'en' | 'zh'
   sound: localStorage.getItem('my-sound') !== 'off',
   motion: localStorage.getItem('my-motion') !== 'off', // motion ON by default
+  visited: new Set(JSON.parse(localStorage.getItem('my-visited') || '[]')),
 };
 
 export const t = (o) => (state.lang === 'zh' ? (o.zh ?? o) : (o.en ?? o));
@@ -80,6 +82,12 @@ export function openOverlay(id) {
   document.body.classList.add('overlay-open');
   openOverlayId = id;
   blip('open');
+  // move focus into the dialog for keyboard users
+  const inner = ov.querySelector('.ov-inner');
+  if (inner) {
+    if (!inner.hasAttribute('tabindex')) inner.setAttribute('tabindex', '-1');
+    inner.focus({ preventScroll: true });
+  }
 }
 export function closeOverlay(silent = false) {
   if (!openOverlayId) return;
@@ -451,6 +459,7 @@ export function openBinWindow() {
 
 let awTab = 0;
 export function openAwardsWindow() {
+  markVisited('awards');
   const rec = makeWindow({
     title: state.lang === 'zh' ? '獲獎紀錄 AWARDS' : 'AWARDS — 60+ Honors',
     width: 'min(640px, 94%)',
@@ -484,6 +493,7 @@ function bindAwardTabs(root) {
 
 /* OS overlay wrapper — opens the full CRT overlay then desktop */
 export function openOS() {
+  markVisited('work');
   // fresh session every time the OS boots (shutdown/reboot clears windows)
   os.wins.forEach((rec) => { rec.el.remove(); rec.taskBtn.remove(); });
   os.wins.clear();
@@ -521,12 +531,233 @@ function updateClock() {
 setInterval(updateClock, 20000);
 
 /* ============================================================
-   OPEN HELPERS (hotspot targets)
+   OPEN HELPERS (hotspot + launcher targets)
    ============================================================ */
-export function openBoard() { renderBoard(); openOverlay('boardOverlay'); }
-export function openSkills() { renderSkills(); openOverlay('skillsOverlay'); }
-export function openContact() { renderContact(); openOverlay('contactOverlay'); }
-export function openPhotos() { renderPhotos(); openOverlay('photosOverlay'); }
+export function markVisited(id) {
+  if (state.visited.has(id)) return;
+  state.visited.add(id);
+  localStorage.setItem('my-visited', JSON.stringify([...state.visited]));
+  renderLauncher();
+}
+
+export function openBoard() { markVisited('profile'); renderBoard(); openOverlay('boardOverlay'); }
+export function openSkills() { markVisited('skills'); renderSkills(); openOverlay('skillsOverlay'); }
+export function openContact() { markVisited('contact'); renderContact(); openOverlay('contactOverlay'); }
+export function openPhotos() { markVisited('moments'); renderPhotos(); openOverlay('photosOverlay'); }
+
+/* ---- JOURNEY app (leadership & service, from the original site) ---- */
+export function renderJourney() {
+  const root = $('#journeyCards');
+  if (!root) return;
+  root.innerHTML = JOURNEY.map((j) => `
+    <article class="jcard">
+      <span class="jtag">${j.tag}</span>
+      <h3 class="jtitle">${t({ en: j.titleEn, zh: j.titleZh })}</h3>
+      <div class="jorg">${t({ en: j.orgEn, zh: j.orgZh })}</div>
+      <p class="jdesc">${t({ en: j.descEn, zh: j.descZh })}</p>
+      <ul class="jpoints">
+        ${(state.lang === 'zh' ? j.pointsZh : j.pointsEn).map((p) => `<li>${p}</li>`).join('')}
+      </ul>
+    </article>`).join('');
+}
+export function openJourney() { markVisited('journey'); renderJourney(); openOverlay('journeyOverlay'); }
+
+/* ---- AWARDS as a standalone app (same content as the OS window) ---- */
+export function openAwardsOverlay() {
+  renderAwardsOverlay();
+  markVisited('awards');
+  openOverlay('awardsOverlay');
+}
+function renderAwardsOverlay() {
+  const root = $('#awardsOverlayBody');
+  if (!root) return;
+  root.innerHTML = awardTabsHTML();
+  bindAwardTabs(root);
+}
+
+/* ============================================================
+   LAUNCHER — persistent mini navigation with progress ticks
+   ============================================================ */
+export function renderLauncher() {
+  const root = $('#launcher');
+  if (!root) return;
+  const items = root.querySelectorAll('.litem[data-app]');
+  items.forEach((btn) => {
+    const app = APPS.find((a) => a.id === btn.dataset.app);
+    if (!app) return;
+    $('.li-lb', btn).textContent = t({ en: app.en, zh: app.zh });
+    btn.classList.toggle('seen', state.visited.has(app.id));
+  });
+  $('#tourItemLabel').textContent = state.lang === 'zh' ? '導覽' : 'TOUR';
+  const prog = $('#launcherProg');
+  if (prog) {
+    const n = APPS.filter((a) => state.visited.has(a.id)).length;
+    prog.textContent = `${n} / ${APPS.length}`;
+    prog.setAttribute('aria-label', `${n} of ${APPS.length} sections explored`);
+  }
+}
+
+export function openApp(id) {
+  const map = {
+    profile: openBoard, work: openOS, journey: openJourney,
+    awards: openAwardsOverlay, skills: openSkills, moments: openPhotos, contact: openContact,
+  };
+  (map[id] || (() => {}))();
+  document.body.classList.remove('launcher-open');
+}
+
+/* ============================================================
+   FLOATING HOTSPOT LABELS (3D → screen projection)
+   ============================================================ */
+const HOT_MAP = { monitor: 'work', keyboard: 'skills', card: 'contact', board: 'profile', photos: 'moments' };
+
+export function renderHotLabels() {
+  const root = $('#hotLabels');
+  if (!root) return;
+  root.innerHTML = Object.entries(HOT_MAP).map(([hot, appId]) => {
+    const app = APPS.find((a) => a.id === appId);
+    return `<button class="hlab" data-hot="${hot}" aria-label="${t({ en: app.en, zh: app.zh })}">
+      <span class="hl-dot"></span>${t({ en: app.en, zh: app.zh })}</button>`;
+  }).join('');
+}
+
+/* delegated once on the persistent container — survives innerHTML re-renders */
+export function initHotLabels() {
+  const root = $('#hotLabels');
+  if (!root || root.dataset.wired) return;
+  root.dataset.wired = '1';
+  root.addEventListener('click', (e) => {
+    const b = e.target.closest('.hlab');
+    if (!b) return;
+    const app = HOT_MAP[b.dataset.hot];
+    if (!app) return;
+    blip('click');
+    openApp(app);
+  });
+}
+
+export function handleProject(positions) {
+  const root = $('#hotLabels');
+  if (!root || document.body.classList.contains('overlay-open') ||
+      document.body.classList.contains('tour-open') ||
+      !document.getElementById('boot').classList.contains('done')) {
+    return;
+  }
+  $$('.hlab', root).forEach((b) => {
+    const p = positions[b.dataset.hot];
+    if (!p || !p.visible) { b.style.opacity = '0'; b.style.pointerEvents = 'none'; return; }
+    b.style.opacity = '1';
+    b.style.pointerEvents = 'auto';
+    b.style.left = p.x + 'px';
+    b.style.top = p.y + 'px';
+  });
+}
+
+/* ============================================================
+   IDENTITY PANEL — Level-1 "who am I" on the first screen
+   ============================================================ */
+export function renderIdentity() {
+  const el = $('#idPanel');
+  if (!el) return;
+  $('#idNameEn').textContent = PROFILE.nameEn;
+  $('#idNameZh').textContent = PROFILE.nameZh;
+  $('#idRole').textContent = `${t({ en: PROFILE.roleEn, zh: PROFILE.roleZh })} · HK`;
+  $('#idSchool').textContent = t({ en: PROFILE.schoolEn, zh: PROFILE.schoolZh });
+  $('#idCta').textContent = state.lang === 'zh' ? '▶ 系統導覽' : '▶ SYSTEM TOUR';
+}
+
+/* ============================================================
+   WELCOME (first visit) + GUIDED TOUR
+   ============================================================ */
+export function maybeShowWelcome() {
+  if (localStorage.getItem('my-welcome')) return;
+  const w = $('#welcomeOverlay');
+  if (!w) return;
+  w.classList.add('open');
+  $('#wSys').textContent = t({ en: WELCOME.sysEn, zh: WELCOME.sysZh });
+  $('#wBody').textContent = t({ en: WELCOME.bodyEn, zh: WELCOME.bodyZh });
+  $('#wStart').textContent = t({ en: WELCOME.startEn, zh: WELCOME.startZh });
+  $('#wExplore').textContent = t({ en: WELCOME.exploreEn, zh: WELCOME.exploreZh });
+  blip('open');
+}
+function closeWelcome() {
+  localStorage.setItem('my-welcome', '1');
+  $('#welcomeOverlay').classList.remove('open');
+}
+
+let tourIdx = -1;
+function tourSteps() {
+  const steps = [{
+    sel: '#idPanel',
+    title: t({ en: TOUR.identityEn, zh: TOUR.identityZh }),
+    body: t({ en: TOUR.identityBodyEn, zh: TOUR.identityBodyZh }),
+  }];
+  APPS.forEach((a) => steps.push({
+    sel: `#launcher .litem[data-app="${a.id}"]`,
+    title: `${a.num} / ${t({ en: a.en, zh: a.zh })}`,
+    body: t({ en: a.tourEn, zh: a.tourZh }),
+  }));
+  return steps;
+}
+
+export function startTour() {
+  closeOverlay(true);
+  document.body.classList.remove('launcher-open');
+  closeWelcome();
+  tourIdx = 0;
+  document.body.classList.add('tour-open');
+  blip('open');
+  renderTour();
+}
+
+function endTour() {
+  tourIdx = -1;
+  localStorage.setItem('my-welcome', '1');
+  document.body.classList.remove('tour-open');
+  $$('.tour-hl').forEach((el) => el.classList.remove('tour-hl'));
+}
+
+function renderTour() {
+  const layer = $('#tourLayer');
+  const steps = tourSteps();
+  const done = tourIdx >= steps.length;
+  const step = steps[tourIdx];
+  $$('.tour-hl').forEach((el) => el.classList.remove('tour-hl'));
+  if (!done) {
+    const target = $(step.sel);
+    if (target) target.classList.add('tour-hl');
+    $('#tourTitle').textContent = step.title;
+    $('#tourBody').textContent = step.body;
+    $('#tourProg').textContent = `STEP ${tourIdx + 1} / ${steps.length}`;
+    $('#tourBack').style.visibility = tourIdx === 0 ? 'hidden' : 'visible';
+    $('#tourNext').textContent = t({ en: TOUR.nextEn, zh: TOUR.nextZh });
+  } else {
+    $('#tourTitle').textContent = t({ en: TOUR.doneTitleEn, zh: TOUR.doneTitleZh });
+    $('#tourBody').textContent = t({ en: TOUR.doneEn, zh: TOUR.doneZh });
+    $('#tourProg').textContent = '100%';
+    $('#tourBack').style.visibility = 'visible';
+    $('#tourNext').textContent = t({ en: TOUR.exploreEn, zh: TOUR.exploreZh });
+  }
+  $('#tourSkip').textContent = t({ en: TOUR.skipEn, zh: TOUR.skipZh });
+}
+
+function tourNext() {
+  blip('click');
+  if (tourIdx >= tourSteps().length) { endTour(); return; }
+  tourIdx++;
+  renderTour();
+}
+function tourBack() {
+  blip('click');
+  if (tourIdx <= 0) return;
+  tourIdx--;
+  renderTour();
+}
+function tourSkip() {
+  blip('close');
+  endTour();
+}
+
 
 /* ============================================================
    GLOBAL WIRING
@@ -536,6 +767,11 @@ export function renderAll() {
   renderSkills();
   renderContact();
   renderPhotos();
+  renderJourney();
+  renderLauncher();
+  renderIdentity();
+  renderHotLabels();
+  if (overlayOpen('awardsOverlay')) renderAwardsOverlay();
   if (overlayOpen('osOverlay')) renderOSDesktop();
   // refresh open project windows' language
   os.wins.forEach((rec) => {
@@ -557,6 +793,41 @@ export function initUI(sceneCtl) {
   };
   window.__sceneSelect = (id) => actions[id] && actions[id]();
   window.__sceneIntro = () => sceneCtl && sceneCtl.intro();
+
+  // launcher navigation
+  initHotLabels();
+  $$('#launcher .litem[data-app]').forEach((b) =>
+    b.addEventListener('click', () => { blip('click'); openApp(b.dataset.app); }));
+  $('#tourItem').addEventListener('click', () => { blip('click'); startTour(); });
+  $('#launcherToggle').addEventListener('click', () => {
+    blip('click');
+    const open = document.body.classList.toggle('launcher-open');
+    $('#launcherToggle').setAttribute('aria-expanded', String(open));
+  });
+  // click outside the launcher sheet closes it (mobile)
+  document.addEventListener('click', (e) => {
+    if (document.body.classList.contains('launcher-open') &&
+        !e.target.closest('#launcher') && !e.target.closest('#launcherToggle')) {
+      document.body.classList.remove('launcher-open');
+    }
+  });
+
+  // welcome dialog
+  $('#wStart').addEventListener('click', () => { closeWelcome(); startTour(); });
+  $('#wExplore').addEventListener('click', () => { closeWelcome(); blip('click'); });
+
+  // identity panel: minimize + tour CTA
+  $('#idCta').addEventListener('click', () => { blip('click'); startTour(); });
+  $('#idClose').addEventListener('click', () => {
+    blip('close');
+    document.body.classList.add('id-mini');
+  });
+
+  // guided tour controls
+  $('#tourNext').addEventListener('click', tourNext);
+  $('#tourBack').addEventListener('click', tourBack);
+  $('#tourSkip').addEventListener('click', tourSkip);
+  window.__tourSkip = tourSkip;
 
   // close buttons / hints
   $('#hintClose').addEventListener('click', () => {
@@ -595,6 +866,7 @@ export function initUI(sceneCtl) {
     ov.addEventListener('click', (e) => {
       if (e.target === ov) {
         if (ov.id === 'osOverlay') return; // OS needs explicit close (like template)
+        if (ov.id === 'welcomeOverlay') { closeWelcome(); return; }
         closeOverlay();
       }
     });
@@ -602,6 +874,8 @@ export function initUI(sceneCtl) {
   // ESC closes topmost thing
   window.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    if (document.body.classList.contains('tour-open')) { tourSkip(); return; }
+    if ($('#welcomeOverlay').classList.contains('open')) { closeWelcome(); return; }
     if ($('#shutdown').classList.contains('on')) return;
     if (overlayOpen('osOverlay')) {
       if (closeTopWindow()) return;
