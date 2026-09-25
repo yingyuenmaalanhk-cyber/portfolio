@@ -4,6 +4,7 @@
 
 import { buildScene } from './scene.js';
 import { initUI, runBoot, setLang, state, blip, handleProject, maybeShowWelcome } from './ui.js';
+import { initGate } from './gate.js';
 
 async function start() {
   // Make sure the pixel + handwriting fonts are ready before baking
@@ -26,9 +27,12 @@ async function start() {
   initUI(sceneCtl);
   setLang(state.lang);
 
-  runBoot(() => {
-    sceneCtl.intro();
-    setTimeout(maybeShowWelcome, 700);
+  // SECURITY GATE → boot → portfolio
+  initGate(() => {
+    runBoot(() => {
+      sceneCtl.intro();
+      setTimeout(maybeShowWelcome, 700);
+    });
   });
 }
 
