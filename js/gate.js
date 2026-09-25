@@ -14,7 +14,9 @@ const state = {
   session: localStorage.getItem('my-session') || '',
 };
 
-export const isPreviewMode = () => !SECURITY.endpoint;
+// localhost is never in the Turnstile domain allowlist, so local development
+// falls back to preview mode; production domains always run real verification.
+export const isPreviewMode = () => !SECURITY.endpoint || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 function setStatus(lines) {
   const box = $('#gateStatus');
