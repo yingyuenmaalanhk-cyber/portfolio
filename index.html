@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Ma Ying Yuen | Tech &amp; Engineering Portfolio</title>
+
+    <meta name="description" content="Ma Ying Yuen - STEM Student passionate about Smart City, Spatial Data Science, and AI. Winner of PolyU Smart City Competition 2025 (1st Runner-up) and multiple awards.">
+    <meta name="keywords" content="Ma Ying Yuen, 馬英源, Smart City, Spatial Data, AI, Engineering, Portfolio, Hong Kong">
+    <meta name="author" content="Ma Ying Yuen">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Ma Ying Yuen | Tech & Engineering Portfolio">
+    <meta property="og:description" content="STEM Student passionate about Smart City, Spatial Data Science, and AI. Winner of multiple competitions and awards.">
+
+    <!-- Retro pixel + handwriting + Chinese fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Caveat:wght@600;700&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Three.js as ES module -->
+    <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+    </script>
+    <!-- Tiny QR encoder for the contact card (global: qrcode) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ma Ying Yuen",
+        "alternateName": "馬英源",
+        "jobTitle": "STEM Student",
+        "description": "STEM Student passionate about Smart City, Spatial Data Science, and AI. Winner of PolyU Smart City Competition 2025 (1st Runner-up) and multiple awards.",
+        "alumniOf": { "@type": "EducationalOrganization", "name": "S.K.H. Bishop Baker Secondary School" },
+        "sameAs": [
+            "https://www.instagram.com/yy.ma.walker/",
+            "https://wa.me/85264399498",
+            "https://github.com/yingyuenmaalanhk-cyber"
+        ],
+        "knowsAbout": ["Spatial Data Science", "Artificial Intelligence", "Python Programming", "GIS", "Smart City"]
+    }
+    </script>
+</head>
+<body>
+    <!-- ===== 3D SCENE ===== -->
+    <div id="sceneLayer"></div>
+
+    <!-- ===== CRT post overlay (scanlines + grain + vignette) ===== -->
+    <div class="crt-overlay"><div class="crt-grain"></div></div>
+
+    <!-- ===== fixed control chips ===== -->
+    <button id="langChip" class="lang-chip" title="Language">繁</button>
+    <div class="sys-chips">
+        <button id="soundChip" class="sys-chip on">♪ SOUND ON</button>
+        <button id="motionChip" class="sys-chip on">◉ MOTION ON</button>
+    </div>
+    <button id="hintClose" class="hint-close">[ X ] CLOSE - ESC</button>
+
+    <!-- ===== BOOT SCREEN ===== -->
+    <div id="boot">
+        <div class="boot-panel">
+            <div class="boot-name">MA YING YUEN</div>
+            <div class="boot-role" data-en="STEM STUDENT" data-zh="STEM 學生">STEM STUDENT</div>
+            <div class="boot-bar"><div class="boot-fill" id="bootFill"></div></div>
+            <div class="boot-status">
+                <span class="lbl" data-en="LOADING SYSTEM..." data-zh="載入系統...">LOADING SYSTEM...</span>
+                <span class="pct" id="bootPct">0%</span>
+            </div>
+            <div class="boot-log" id="bootLog"></div>
+        </div>
+    </div>
+
+    <!-- ===== CORK BOARD — CAREER BOARD (notepad paper hotspot) ===== -->
+    <div id="boardOverlay" class="overlay">
+        <div class="ov-inner">
+            <div class="corkboard">
+                <div class="board-head">
+                    <span class="bt-a">BOARD</span><span class="bt-slash">//</span>
+                    <span class="bt-zh" data-en="Profile" data-zh="簡介">Profile</span>
+                    <span class="bt-badge">CORKBOARD</span>
+                </div>
+                <div class="board-cols">
+                    <div class="profile-card">
+                        <span class="pin"></span>
+                        <div class="profile-name-zh" id="profileZhName"></div>
+                        <div class="profile-name-en" id="profileEnName"></div>
+                        <div class="profile-badges" id="profileBadges"></div>
+                        <div class="profile-school" id="profileSchool"></div>
+                    </div>
+                    <div class="notes-col" id="stickyNotes"></div>
+                </div>
+                <div class="timeline-head">
+                    <span class="th-a">TIMELINE</span>
+                    <span class="th-zh" data-en="→ Awards" data-zh="→ 獎項">→ Awards</span>
+                    <span class="th-line"></span>
+                </div>
+                <div class="awards-grid" id="boardCards"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SKILLS NOTEBOOK (keyboard hotspot) ===== -->
+    <div id="skillsOverlay" class="overlay">
+        <div class="ov-inner">
+            <div class="notebook">
+                <div class="nb-tabs" id="nbTabs"></div>
+                <div class="nb-inner">
+                    <div class="nb-rings"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="nb-head" id="nbHead"></div>
+                    <div class="chips" id="nbChips"></div>
+                    <div class="nb-foot">
+                        <div class="nb-nav">
+                            <button id="nbPrev">◀ PREV</button>
+                            <button id="nbNext">NEXT ▶</button>
+                        </div>
+                        <div class="nb-page" id="nbPage">PAGE 1 / 2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTACT CARD (business card hotspot) ===== -->
+    <div id="contactOverlay" class="overlay">
+        <div class="ov-inner">
+            <div class="contact-wrap">
+                <div class="contact-card" id="contactCard">
+                    <div class="cc-face front">
+                        <div class="cc-en" id="ccEn"></div>
+                        <div class="cc-zh" id="ccZh"></div>
+                        <div class="cc-role" id="ccRole"></div>
+                        <div class="cc-rows" id="ccRows"></div>
+                        <div class="cc-flip" id="ccFlipHint">○ CLICK TO FLIP</div>
+                    </div>
+                    <div class="cc-face back cc-qr">
+                        <div class="qr-box" id="qrBox"></div>
+                        <div class="cc-scan" id="ccScan">SCAN ME · WHATSAPP</div>
+                        <div class="cc-sub" data-en="point your camera at the code" data-zh="用相機掃描二維碼">point your camera at the code</div>
+                    </div>
+                </div>
+                <div class="cc-caption" id="ccCaption">CONTACT CARD — CLICK TO FLIP</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PHOTO ALBUM (clipboard hotspot) ===== -->
+    <div id="photosOverlay" class="overlay">
+        <div class="ov-inner">
+            <div class="notebook">
+                <div class="nb-inner">
+                    <div class="nb-rings"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="nb-head"><span class="zh" data-en="// album PHOTOS" data-zh="// 相簿 PHOTOS">// album PHOTOS</span></div>
+                    <div class="album-stage" id="albumStage"></div>
+                    <div class="album-dots" id="albumDots"></div>
+                    <div class="nb-foot">
+                        <div class="nb-nav">
+                            <button id="albumPrev">◀ PREV</button>
+                            <button id="albumNext">NEXT ▶</button>
+                        </div>
+                        <div class="nb-page" data-en="CLICK PHOTO TO OPEN" data-zh="點擊相片打開原圖">CLICK PHOTO TO OPEN</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== RETRO-OS (monitor hotspot) ===== -->
+    <div id="osOverlay" class="overlay">
+        <div class="ov-inner crt-shell">
+            <div class="crt-screen">
+                <div class="os-desktop">
+                    <div class="os-icons-left" id="osIconsLeft"></div>
+                    <div class="os-icons-right" id="osIconsRight"></div>
+                    <div class="os-winlayer" id="osWinLayer"></div>
+                    <div class="start-menu" id="startMenu"></div>
+                    <div class="os-taskbar">
+                        <button class="start-btn" id="startBtn">
+                            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                                <rect x="1" y="1" width="5.4" height="5.4" fill="#e8443c"/>
+                                <rect x="7.6" y="1" width="5.4" height="5.4" fill="#4cb848"/>
+                                <rect x="1" y="7.6" width="5.4" height="5.4" fill="#3b7ddd"/>
+                                <rect x="7.6" y="7.6" width="5.4" height="5.4" fill="#f2b822"/>
+                            </svg>
+                            <span data-en="Start" data-zh="開始">Start</span>
+                        </button>
+                        <div class="task-btns" id="taskBtns"></div>
+                        <div class="os-clock" id="osClock">🕓 --:--</div>
+                    </div>
+                </div>
+            </div>
+            <div class="os-statusbar">
+                <span>RETRO-OS 95 · CRT-15</span>
+                <span>MA YING YUEN EDITION</span>
+                <span class="led">PRO ●</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SHUTDOWN ===== -->
+    <div id="shutdown">
+        <div class="sd-text">
+            <span data-en="It's now safe to turn off" data-zh="現在可以安全地關閉">It's now safe to turn off</span><br>
+            <span data-en="your computer." data-zh="你的電腦。">your computer.</span>
+        </div>
+        <button class="sd-reboot" id="rebootBtn" data-en="&gt; REBOOT SYSTEM &lt;" data-zh="&gt; 重新啟動系統 &lt;">&gt; REBOOT SYSTEM &lt;</button>
+    </div>
+
+    <noscript>
+        <div style="position:fixed;inset:0;background:#0b0d0a;color:#4fe36a;display:flex;align-items:center;justify-content:center;font-family:monospace;padding:30px;text-align:center;z-index:999999;">
+            Ma Ying Yuen — STEM Student · Portfolio.<br>
+            yingyuenma.alanhk@gmail.com · wa.me/85264399498<br>
+            (Please enable JavaScript for the full 3D experience.)
+        </div>
+    </noscript>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
