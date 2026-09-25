@@ -339,18 +339,18 @@ export function buildScene(container, opts = {}) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.38;
+  renderer.toneMappingExposure = 1.28;
   container.appendChild(renderer.domElement);
   renderer.domElement.id = 'scene-canvas';
   renderer.domElement.style.touchAction = 'none';
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xded6c4);
+  scene.background = new THREE.Color(0x0f1712);
 
   const camera = new THREE.PerspectiveCamera(44, window.innerWidth / window.innerHeight, 0.1, 40);
 
   /* ----- room ----- */
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xe2dac6, roughness: 0.96 });
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x1c2a20, roughness: 0.96 });
   const wall = new THREE.Mesh(new THREE.BoxGeometry(9, 4.6, 0.18), wallMat);
   wall.position.set(0, 2.3, -1.78);
   wall.receiveShadow = true;
@@ -364,7 +364,7 @@ export function buildScene(container, opts = {}) {
 
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(9, 8),
-    new THREE.MeshStandardMaterial({ color: 0xcfc3ae, roughness: 0.95 })
+    new THREE.MeshStandardMaterial({ color: 0x141f18, roughness: 0.95 })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(0, 0, 1.2);
@@ -372,8 +372,8 @@ export function buildScene(container, opts = {}) {
   scene.add(floor);
 
   /* ----- lights ----- */
-  scene.add(new THREE.HemisphereLight(0xfff4e0, 0x8a7a5e, 0.9));
-  const fill = new THREE.DirectionalLight(0xfff1dc, 0.72);
+  scene.add(new THREE.HemisphereLight(0xa8c2ae, 0x101a12, 0.78));
+  const fill = new THREE.DirectionalLight(0xbfd8c4, 0.46);
   fill.position.set(2.4, 3.6, 3.2);
   scene.add(fill);
 
@@ -442,7 +442,7 @@ export function buildScene(container, opts = {}) {
   monitor.position.set(-0.12, DESK_Y, -0.02);
   scene.add(monitor);
 
-  const screenGlow = new THREE.PointLight(0x63e06e, 0.3, 1.4, 2);
+  const screenGlow = new THREE.PointLight(0x63e06e, 0.55, 1.8, 2);
   screenGlow.position.set(-0.12, DESK_Y + 0.42, 0.5);
   scene.add(screenGlow);
 
