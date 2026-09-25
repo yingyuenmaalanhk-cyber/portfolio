@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import { buildScene } from './scene.js';
-import { initUI, runBoot, setLang, state, blip } from './ui.js';
+import { initUI, runBoot, setLang, state, blip, handleProject, maybeShowWelcome } from './ui.js';
 
 async function start() {
   // Make sure the pixel + handwriting fonts are ready before baking
@@ -19,13 +19,17 @@ async function start() {
     reduceMotion: !state.motion,
     onHover: (id) => { if (id) blip('hover'); },
     onSelect: (id) => { window.__sceneSelect && window.__sceneSelect(id); },
+    onProject: (positions) => handleProject(positions),
   });
   window.__sceneIntro = () => sceneCtl.intro();
 
   initUI(sceneCtl);
   setLang(state.lang);
 
-  runBoot(() => sceneCtl.intro());
+  runBoot(() => {
+    sceneCtl.intro();
+    setTimeout(maybeShowWelcome, 700);
+  });
 }
 
 if (document.readyState === 'loading') {
