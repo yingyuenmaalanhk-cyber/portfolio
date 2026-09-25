@@ -46,19 +46,54 @@
     </script>
 </head>
 <body>
+    <h1 class="sr-only">Ma Ying Yuen 馬英源 — STEM Student · Interactive Retro-OS Portfolio. Smart City, Spatial Data Science, AI, Engineering. S.K.H. Bishop Baker Secondary School, Hong Kong.</h1>
+
     <!-- ===== 3D SCENE ===== -->
     <div id="sceneLayer"></div>
 
     <!-- ===== CRT post overlay (scanlines + grain + vignette) ===== -->
     <div class="crt-overlay"><div class="crt-grain"></div></div>
 
+    <!-- ===== IDENTITY PANEL — Level 1: who am I ===== -->
+    <section id="idPanel" class="id-panel" aria-label="Identity">
+        <div class="id-top">
+            <span class="id-led" aria-hidden="true"></span>
+            <span class="id-sys" data-en="PROFILE · ONLINE" data-zh="個人檔案 · 在線">PROFILE · ONLINE</span>
+            <button id="idClose" class="id-close" aria-label="Minimize identity panel" title="–">–</button>
+        </div>
+        <div class="id-body">
+            <h2 class="id-name"><span id="idNameEn">Ma Ying Yuen</span>&nbsp;<span id="idNameZh">馬英源</span></h2>
+            <div class="id-role" id="idRole">STEM STUDENT · HK</div>
+            <div class="id-school" id="idSchool">S.K.H. Bishop Baker Secondary School</div>
+            <button id="idCta" class="id-cta" aria-label="Start the guided tour">▶ SYSTEM TOUR</button>
+        </div>
+    </section>
+
     <!-- ===== fixed control chips ===== -->
-    <button id="langChip" class="lang-chip" title="Language">繁</button>
     <div class="sys-chips">
+        <button id="langChip" class="sys-chip" title="Language / 語言">繁</button>
         <button id="soundChip" class="sys-chip on">♪ SOUND ON</button>
         <button id="motionChip" class="sys-chip on">◉ MOTION ON</button>
     </div>
-    <button id="hintClose" class="hint-close">[ X ] CLOSE - ESC</button>
+    <button id="hintClose" class="hint-close" aria-label="Close window">[ X ] CLOSE - ESC</button>
+
+    <!-- ===== LAUNCHER — persistent navigation (01–07 journey) ===== -->
+    <button id="launcherToggle" class="launcher-toggle" aria-expanded="false" aria-controls="launcher">☰ APPS</button>
+    <nav id="launcher" class="launcher" aria-label="Portfolio launcher">
+        <div class="la-head"><span data-en="LAUNCHER" data-zh="啟動器">LAUNCHER</span><span id="launcherProg" class="la-prog">0 / 7</span></div>
+        <button class="litem" data-app="profile"><span class="li-num">01</span><span class="li-ic" aria-hidden="true">📋</span><span class="li-lb">PROFILE</span><span class="li-tick" aria-hidden="true">✓</span></button>
+        <button class="litem" data-app="work"><span class="li-num">02</span><span class="li-ic" aria-hidden="true">🖥️</span><span class="li-lb">WORK</span><span class="li-tick" aria-hidden="true">✓</span></button>
+        <button class="litem" data-app="journey"><span class="li-num">03</span><span class="li-ic" aria-hidden="true">🧭</span><span class="li-lb">JOURNEY</span><span class="li-tick" aria-hidden="true">✓</span></button>
+        <button class="litem" data-app="awards"><span class="li-num">04</span><span class="li-ic" aria-hidden="true">🏆</span><span class="li-lb">AWARDS</span><span class="li-tick" aria-hidden="true">✓</span></button>
+        <button class="litem" data-app="skills"><span class="li-num">05</span><span class="li-ic" aria-hidden="true">🔧</span><span class="li-lb">SKILLS</span><span class="li-tick" aria-hidden="true">✓</span></button>
+        <button class="litem" data-app="moments"><span class="li-num">06</span><span class="li-ic" aria-hidden="true">📷</span><span class="li-lb">MOMENTS</span><span class="li-tick" aria-hidden="true">✓</span></button>
+        <button class="litem" data-app="contact"><span class="li-num">07</span><span class="li-ic" aria-hidden="true">📞</span><span class="li-lb">CONNECT</span><span class="li-tick" aria-hidden="true">✓</span></button>
+        <div class="la-sep" aria-hidden="true"></div>
+        <button class="litem tour" id="tourItem"><span class="li-num">?</span><span class="li-ic" aria-hidden="true">🧭</span><span class="li-lb" id="tourItemLabel">TOUR</span></button>
+    </nav>
+
+    <!-- ===== floating hotspot labels over the 3D desk ===== -->
+    <div id="hotLabels" class="hot-labels"></div>
 
     <!-- ===== BOOT SCREEN ===== -->
     <div id="boot">
@@ -75,7 +110,7 @@
     </div>
 
     <!-- ===== CORK BOARD — CAREER BOARD (notepad paper hotspot) ===== -->
-    <div id="boardOverlay" class="overlay">
+    <div id="boardOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="Profile corkboard">
         <div class="ov-inner">
             <div class="corkboard">
                 <div class="board-head">
@@ -104,7 +139,7 @@
     </div>
 
     <!-- ===== SKILLS NOTEBOOK (keyboard hotspot) ===== -->
-    <div id="skillsOverlay" class="overlay">
+    <div id="skillsOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="Skills notebook">
         <div class="ov-inner">
             <div class="notebook">
                 <div class="nb-tabs" id="nbTabs"></div>
@@ -125,7 +160,7 @@
     </div>
 
     <!-- ===== CONTACT CARD (business card hotspot) ===== -->
-    <div id="contactOverlay" class="overlay">
+    <div id="contactOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="Contact card">
         <div class="ov-inner">
             <div class="contact-wrap">
                 <div class="contact-card" id="contactCard">
@@ -148,7 +183,7 @@
     </div>
 
     <!-- ===== PHOTO ALBUM (clipboard hotspot) ===== -->
-    <div id="photosOverlay" class="overlay">
+    <div id="photosOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="Photo album">
         <div class="ov-inner">
             <div class="notebook">
                 <div class="nb-inner">
@@ -169,7 +204,7 @@
     </div>
 
     <!-- ===== RETRO-OS (monitor hotspot) ===== -->
-    <div id="osOverlay" class="overlay">
+    <div id="osOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="RETRO-OS desktop">
         <div class="ov-inner crt-shell">
             <div class="crt-screen">
                 <div class="os-desktop">
@@ -196,6 +231,65 @@
                 <span>RETRO-OS 95 · CRT-15</span>
                 <span>MA YING YUEN EDITION</span>
                 <span class="led">PRO ●</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== JOURNEY (leadership & service) ===== -->
+    <div id="journeyOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="Journey">
+        <div class="ov-inner">
+            <div class="notebook">
+                <div class="nb-inner">
+                    <div class="nb-rings"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="nb-head"><span class="zh" data-en="// growth JOURNEY" data-zh="// 成長 JOURNEY">// growth JOURNEY</span></div>
+                    <div class="journey-cards" id="journeyCards"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== AWARDS (standalone app) ===== -->
+    <div id="awardsOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="Awards archive">
+        <div class="ov-inner">
+            <div class="win98 win-standalone">
+                <div class="win-title">
+                    <span class="wt-txt" data-en="awards.db — 60+ Honors" data-zh="awards.db — 獲獎紀錄">awards.db — 60+ Honors</span>
+                    <span class="wt-btns"><i data-a="min">_</i><i data-a="max">□</i><i data-a="close" role="button" aria-label="Close">×</i></span>
+                </div>
+                <div class="win-menubar"><span>File</span><span>Edit</span><span>View</span><span>Help</span></div>
+                <div class="win-body" id="awardsOverlayBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== WELCOME (first visit) ===== -->
+    <div id="welcomeOverlay" class="overlay welcome" role="dialog" aria-modal="true" aria-label="Welcome">
+        <div class="ov-inner">
+            <div class="welcome-box">
+                <div class="wb-title">MA YING YUEN OS</div>
+                <div class="wb-sys" id="wSys">SYSTEM READY · NEW USER DETECTED</div>
+                <div class="wb-sep" aria-hidden="true"></div>
+                <p class="wb-body" id="wBody"></p>
+                <div class="wb-btns">
+                    <button id="wStart" class="wb-primary">▶ START GUIDED TOUR</button>
+                    <button id="wExplore" class="wb-ghost">EXPLORE FREELY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== GUIDED TOUR ===== -->
+    <div id="tourLayer" class="tour-layer" role="dialog" aria-live="polite" aria-label="Guided tour">
+        <div class="tour-box">
+            <div class="tb-head">
+                <span id="tourProg" class="tb-prog">STEP 1 / 8</span>
+                <button id="tourSkip" class="tb-skip">SKIP TOUR</button>
+            </div>
+            <div class="tb-title" id="tourTitle"></div>
+            <p class="tb-body" id="tourBody"></p>
+            <div class="tb-btns">
+                <button id="tourBack" class="tb-btn">◀ BACK</button>
+                <button id="tourNext" class="tb-btn primary">NEXT ▶</button>
             </div>
         </div>
     </div>
