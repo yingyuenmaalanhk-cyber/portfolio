@@ -310,6 +310,116 @@ export const BOOT_LINES = [
 
 export const BOOT_HINT = 'TIP: CLICK THE KEYBOARD · PAPERS · CARD · SCREEN';
 
+/* ------------------------------------------------------------------
+   SITE-AS-OS information architecture
+   7 "apps" — the persistent LAUNCHER navigation & guided tour.
+   Order = recommended first-visit journey.
+   ------------------------------------------------------------------ */
+export const APPS = [
+  {
+    id: 'profile', num: '01', icon: '📋', file: 'PROFILE.EXE',
+    en: 'PROFILE', zh: '個人簡介',
+    tourEn: 'Start here. This is where you learn who I am, what I study, and what I care about.',
+    tourZh: '從這裡開始。你可以在這裡認識我是誰、讀什麼、在乎什麼。',
+  },
+  {
+    id: 'work', num: '02', icon: '🖥️', file: 'RETRO-OS.EXE',
+    en: 'WORK', zh: '作品',
+    tourEn: 'Next, explore what I have built. This section shows my projects, technical interests, and problem-solving work.',
+    tourZh: '接著看看我造過什麼。這裡展示我的專案、技術興趣與解難作品。',
+  },
+  {
+    id: 'journey', num: '03', icon: '🧭', file: 'JOURNEY.TXT',
+    en: 'JOURNEY', zh: '成長經歷',
+    tourEn: 'This is my development over time — leadership, service, and important milestones.',
+    tourZh: '這是我在時間中的成長——領袖、服務與重要里程碑。',
+  },
+  {
+    id: 'awards', num: '04', icon: '🏆', file: 'AWARDS.DB',
+    en: 'AWARDS', zh: '獲獎紀錄',
+    tourEn: 'Here you can explore selected awards, competitions, and accomplishments — 58+ honors in four categories.',
+    tourZh: '這裡可以瀏覽我的獎項、比賽與成就——四大分類、58+ 項榮譽。',
+  },
+  {
+    id: 'skills', num: '05', icon: '🔧', file: 'SKILLS.TXT',
+    en: 'SKILLS', zh: '技能清單',
+    tourEn: 'See the skills and technologies behind the projects.',
+    tourZh: '看看專案背後的技能與技術。',
+  },
+  {
+    id: 'moments', num: '06', icon: '📷', file: 'MOMENTS.JPG',
+    en: 'MOMENTS', zh: '生活相簿',
+    tourEn: 'This is the more personal side of the portfolio — moments, interests, and experiences.',
+    tourZh: '這是作品集裡更個人的一面——時刻、興趣與經歷。',
+  },
+  {
+    id: 'contact', num: '07', icon: '📞', file: 'CONNECT.SYS',
+    en: 'CONNECT', zh: '聯絡方式',
+    tourEn: 'Want to know more? This is where you can contact or connect with me.',
+    tourZh: '想了解更多？這裡可以聯絡或連結我。',
+  },
+];
+
+export const WELCOME = {
+  title: 'MA YING YUEN OS',
+  sysEn: 'SYSTEM READY · NEW USER DETECTED',
+  sysZh: '系統就緒 · 偵測到新用戶',
+  bodyEn: 'This portfolio is an interactive personal system — a retro desktop where every object on the desk opens a part of my story. New users can follow a guided path to understand my story step by step.',
+  bodyZh: '這個作品集是一個互動式個人系統——復古桌面上每一件物件都通往我故事的一部分。新用戶可以跟隨引導路徑，逐步認識我的故事。',
+  startEn: '▶ START GUIDED TOUR', startZh: '▶ 開始引導導覽',
+  exploreEn: 'EXPLORE FREELY', exploreZh: '自由探索',
+};
+
+export const TOUR = {
+  introTitleEn: 'GUIDED TOUR', introTitleZh: '引導導覽',
+  introEn: 'The LAUNCHER on the right lists everything inside this system. Follow the numbered path, or skip and explore freely.',
+  introZh: '右側的 LAUNCHER 列出了系統內的所有內容。跟著編號路徑走，或者跳過自由探索。',
+  doneTitleEn: 'SYSTEM TOUR COMPLETE', doneTitleZh: '系統導覽完成',
+  doneEn: "You now know the basic structure of Ma Ying Yuen's portfolio. You can restart this tour anytime with the ? TOUR button.",
+  doneZh: '你已經認識這個作品集的基本結構。隨時可以按 ？TOUR 重新觀看。',
+  exploreEn: 'EXPLORE PORTFOLIO', exploreZh: '開始探索作品集',
+  identityEn: '01 / IDENTITY', identityZh: '01 / 身份',
+  identityBodyEn: 'This is where you learn who I am, what I study, and what I care about.',
+  identityBodyZh: '你在這裡認識我：姓名、學校、方向。',
+  skipEn: 'SKIP TOUR', skipZh: '跳過導覽',
+  nextEn: 'NEXT ▶', nextZh: '下一個 ▶',
+  backEn: '◀ BACK', backZh: '◀ 上一個',
+};
+
+/* ------------------------------------------------------------------
+   JOURNEY — leadership & service timeline (from the original site)
+   ------------------------------------------------------------------ */
+export const JOURNEY = [
+  {
+    tag: '2022 – 2025',
+    titleEn: 'Vice-head Prefect', titleZh: '副領袖生長',
+    orgEn: 'S.K.H. Bishop Baker Secondary School', orgZh: '聖公會白約翰會督中學',
+    descEn: 'Assisted in maintaining discipline, winning "Model & Excellent Prefect" awards multiple times. Demonstrated reliability, integrity, and responsibility, earning the trust of teachers and peers.',
+    descZh: '協助維持校園紀律，多次獲得「模範&優異領袖生」獎項。展現出高度的可靠性、誠信和責任感，並贏得了師生的信任。',
+    pointsEn: ['Won "Model & Excellent Prefect" Award multiple times', 'Earned trust of teachers and peers', 'Demonstrated high reliability and responsibility'],
+    pointsZh: ['多次獲得「模範&優異領袖生」獎項', '贏得師生信任', '展現高度可靠性和責任感'],
+  },
+  {
+    tag: '2023 – 2024',
+    titleEn: 'Mi Teen Chairperson', titleZh: 'Mi Teen 學會主席',
+    orgEn: 'STEAM Promotion', orgZh: 'STEAM 推廣',
+    descEn: 'Coordinated STEAM activities and led members to put theory into practice by developing innovative projects. Promoted a "hands-on" learning atmosphere.',
+    descZh: '統籌 STEAM 活動，帶領成員將理論付諸實踐，開發創新項目。推動了「動手做」的學習氛圍。',
+    pointsEn: ['Led team to develop Smart Treadmill and Basketball Scoring Machine', 'Coordinated STEAM lectures and workshops', 'Promoted "theoretical learning + practical innovation" model'],
+    pointsZh: ['帶領團隊研發智能跑步機、投籃計分機等項目', '統籌策劃校內外 STEAM 講座和工作坊', '推動「理論學習+實踐創新」發展模式'],
+  },
+  {
+    tag: '2023 – 2025',
+    titleEn: 'Mentor & Big Brother', titleZh: '數學輔導員 & 學長',
+    orgEn: 'Peer Support', orgZh: '朋輩支援',
+    descEn: 'Served as a Mathematics Mentor and Big Brother scheme member, patiently guiding junior students in academics and school life adaptation.',
+    descZh: '擔任數學學會導師及「大哥哥大姐姐」計劃成員，耐心指導低年級同學，協助他們解決學業困難並適應校園生活。',
+    pointsEn: ['Participated in Big Brother/Sister Scheme', 'Patiently guided junior students', 'Helped with academic difficulties and school adaptation'],
+    pointsZh: ['參與「大哥哥大姐姐計劃」', '耐心指導低年級同學', '協助解決學業困難並適應校園生活'],
+  },
+];
+
+
 /* Interests (from original bento grid) — used on the OS "ABOUT" window if opened
    via right-icon; keeps original interest content reachable. */
 export const INTERESTS = [
