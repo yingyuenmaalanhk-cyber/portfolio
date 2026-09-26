@@ -457,7 +457,61 @@ export function openBinWindow() {
   blip('open');
 }
 
+/* ============================================================
+   AWARD TAB CONTROLLER — single source of truth.
+   Every entry point (RETRO-OS window, launcher overlay, lang
+   switch) renders + binds through these functions. The controller
+   never depends on an implicit global `event` and works no matter
+   which element is passed as root.
+   ============================================================ */
 let awTab = 0;
+
+function awardBodyOf(root) {
+  if (!root) return null;
+  if (root.classList && root.classList.contains('win-body')) return root;
+  return $('.win-body', root) || root;
+}
+
+function awardTabsHTML() {
+  const active = AWARD_TABS[awTab];
+  return `
+    <div class="aw-tabs" role="tablist" aria-label="${state.lang === 'zh' ? '獎項分類' : 'Award categories'}">${AWARD_TABS.map((a, i) =>
+      `<button class="aw-tab ${i === awTab ? 'active' : ''}" role="tab" id="aw-tab-${a.id}"
+        aria-selected="${i === awTab}" aria-controls="aw-panel-${a.id}" data-t="${i}">${state.lang === 'zh' ? a.labelZh : a.labelEn}</button>`).join('')}
+    </div>
+    <div class="aw-list" role="tabpanel" id="aw-panel-${active.id}" aria-labelledby="aw-tab-${active.id}">
+      <div class="aw-cat">${t({ en: active.titleEn, zh: active.titleZh })}</div>
+      ${active.rows.map((r) => `
+        <div class="aw-row"><span class="yr">${r.year}</span><span class="nm">${r.name}</span><span class="org">${r.sub}</span></div>`).join('')}
+    </div>`;
+}
+
+/* the one and only tab switcher — call with an index and any root */
+function setAwardTab(idx, root) {
+  if (idx < 0 || idx >= AWARD_TABS.length) return;
+  awTab = idx;
+  blip('click');
+  const body = awardBodyOf(root);
+  if (!body) return;
+  body.innerHTML = awardTabsHTML();
+  bindAwardTabs(body);
+}
+
+function bindAwardTabs(root) {
+  const body = awardBodyOf(root);
+  if (!body) return;
+  $$('.aw-tab', body).forEach((b) => b.addEventListener('click', () => setAwardTab(+b.dataset.t, body)));
+}
+
+/* full (re)initialization — used by every way of opening Awards */
+function initAwardController(root) {
+  const body = awardBodyOf(root);
+  if (!body) return;
+  if (awTab < 0 || awTab >= AWARD_TABS.length) awTab = 0;
+  body.innerHTML = awardTabsHTML();
+  bindAwardTabs(body);
+}
+
 export function openAwardsWindow() {
   markVisited('awards');
   const rec = makeWindow({
@@ -466,29 +520,10 @@ export function openAwardsWindow() {
     bodyHTML: awardTabsHTML(),
     bodyClass: 'wide',
   });
-  rec.el.querySelector('.win-body').style.maxHeight = '340px';
-  bindAwardTabs(rec.el);
+  const body = rec.el.querySelector('.win-body');
+  body.style.maxHeight = '340px';
+  initAwardController(body);
   blip('open');
-}
-
-function awardTabsHTML() {
-  return `
-    <div class="aw-tabs">${AWARD_TABS.map((a, i) =>
-      `<button class="aw-tab ${i === awTab ? 'active' : ''}" data-t="${i}">${state.lang === 'zh' ? a.labelZh : a.labelEn}</button>`).join('')}
-    </div>
-    <div class="aw-list">
-      <div class="aw-cat">${t({ en: AWARD_TABS[awTab].titleEn, zh: AWARD_TABS[awTab].titleZh })}</div>
-      ${AWARD_TABS[awTab].rows.map((r) => `
-        <div class="aw-row"><span class="yr">${r.year}</span><span class="nm">${r.name}</span><span class="org">${r.sub}</span></div>`).join('')}
-    </div>`;
-}
-function bindAwardTabs(root) {
-  $$('.aw-tab', root).forEach((b) => b.addEventListener('click', () => {
-    awTab = +b.dataset.t;
-    blip('click');
-    $('.win-body', root).innerHTML = awardTabsHTML();
-    bindAwardTabs(root);
-  }));
 }
 
 /* OS overlay wrapper — opens the full CRT overlay then desktop */
@@ -571,8 +606,7 @@ export function openAwardsOverlay() {
 function renderAwardsOverlay() {
   const root = $('#awardsOverlayBody');
   if (!root) return;
-  root.innerHTML = awardTabsHTML();
-  bindAwardTabs(root);
+  initAwardController(root);
 }
 
 /* ============================================================
@@ -604,6 +638,8 @@ export function openApp(id) {
   };
   (map[id] || (() => {}))();
   document.body.classList.remove('launcher-open');
+  const t = $('#launcherToggle');
+  if (t) t.setAttribute('aria-expanded', 'false');
 }
 
 /* ============================================================
@@ -713,7 +749,7 @@ export function startTour() {
 function endTour() {
   tourIdx = -1;
   localStorage.setItem('my-welcome', '1');
-  document.body.classList.remove('tour-open');
+  document.body.classList.remove('tour-open', 'launcher-open');
   $$('.tour-hl').forEach((el) => el.classList.remove('tour-hl'));
 }
 
@@ -725,7 +761,11 @@ function renderTour() {
   $$('.tour-hl').forEach((el) => el.classList.remove('tour-hl'));
   if (!done) {
     const target = $(step.sel);
-    if (target) target.classList.add('tour-hl');
+    if (target) {
+      // tour steps that point inside the launcher summon it first
+      if (target.closest('#launcher')) document.body.classList.add('launcher-open');
+      target.classList.add('tour-hl');
+    }
     $('#tourTitle').textContent = step.title;
     $('#tourBody').textContent = step.body;
     $('#tourProg').textContent = `STEP ${tourIdx + 1} / ${steps.length}`;
@@ -809,6 +849,8 @@ export function initUI(sceneCtl) {
     if (document.body.classList.contains('launcher-open') &&
         !e.target.closest('#launcher') && !e.target.closest('#launcherToggle')) {
       document.body.classList.remove('launcher-open');
+      const t = $('#launcherToggle');
+      if (t) t.setAttribute('aria-expanded', 'false');
     }
   });
 
