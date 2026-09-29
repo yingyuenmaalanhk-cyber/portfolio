@@ -91,6 +91,7 @@ export const PROJECTS = [
     descZh: '獲得 2025 年 1st Runner-up（亞軍）。帶領團隊利用空間數據分析解決實際城市問題，展現了與大學課程接軌的實踐能力。',
     link: 'https://github.com/yingyuenmaalanhk-cyber/Smart-City-Competition-2025',
     linkLabel: 'github.com/yingyuenmaalanhk-cyber/Smart-City-Competition-2025',
+    image: 'https://www.polyu.edu.hk/fce/-/media/department/fce/content/smart-city-event/smart-city-banner-2025_v2.jpg?mh=450&mw=1920',
     foot: '1st Runner-up · PolyU FCE · 2025',
   },
   {
@@ -110,6 +111,7 @@ export const PROJECTS = [
     descEn: 'Certificate of Merit in CUHK AI Hackathon 2025. Applied programming and AI thinking to solve complex problems.',
     descZh: '在中大賽馬會「智」為未來 AI Hackathon 2025 中獲得優異獎（Certificate of Merit）。運用編程與 AI 思維解決複雜問題。',
     link: '',
+    image: 'https://cuhkjc-aiforfuture.hk/wp-content/uploads/2025/04/AI-Hackathon-Web-Banner.jpg',
     foot: 'Certificate of Merit · CUHK · 2025',
   },
   {
@@ -130,6 +132,7 @@ export const PROJECTS = [
     descZh: '智慧考勤系統有三個關鍵組件：MySQL、Apache web 伺服器和用戶端 PC。',
     link: 'https://miteen.hk/attendance/attlogin',
     linkLabel: 'miteen.hk/attendance/attlogin',
+    image: 'https://yingyuenmaalanhk-cyber.github.io/alanmahk/Smart%20Attendance%20System.jpg',
     foot: 'Live system · MiTeen · HK',
   },
   {
