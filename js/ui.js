@@ -430,7 +430,7 @@ export function closeTopWindow() {
 
 export function openProjectWindow(p) {
   const html = `
-    ${p.image ? `<img class="win-img" src="${p.image}" alt="${t({ en: p.labelEn, zh: p.labelZh })}" loading="lazy">` : ''}
+    ${p.image ? `<img class="win-img" src="${p.image}" alt="${t({ en: p.labelEn, zh: p.labelZh })}" loading="lazy" onerror="this.remove()">` : ''}
     <div class="win-proj-title">${t({ en: p.titleEn, zh: p.titleZh })}<span class="win-badge">${p.badge}</span></div>
     <div class="win-chips">${p.chips.map((c) => `<span class="win-chip">${c}</span>`).join('')}</div>
     <ul>${p.bullets.map((b) => `<li>${t(b)}</li>`).join('')}</ul>
