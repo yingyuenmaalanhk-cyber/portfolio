@@ -511,7 +511,6 @@ export function buildScene(container, opts = {}) {
    01 · HOLOGRAPHIC WORKSTATION
    ============================================================ */
   const console0 = new THREE.Group(); // physical base
-  const holo = new THREE.Group();     // floating holographic layer
 
   // two-tier cream console
   const baseLower = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.055, 0.36), MAT.cream);
@@ -561,24 +560,55 @@ export function buildScene(container, opts = {}) {
   const holoMain = new HoloMainScreen();
   const holoSide = new HoloSideScreen();
 
-  const ARC_R = 1.35, ARC_L = 0.52, ARC_H = 0.46, arcFrontZ = 0.14;
-  function holoStrip(height, radius, material, y) {
-    const g = new THREE.CylinderGeometry(radius, radius, height, 40, 1, true, -ARC_L / 2, ARC_L);
-    const m = new THREE.Mesh(g, material);
-    m.position.set(0, y, arcFrontZ - radius);
-    return m;
-  }
-  // main translucent curved panel
-  const mainPanel = holoStrip(ARC_H, ARC_R, new THREE.MeshBasicMaterial({
-    map: holoMain.texture, transparent: true, opacity: 0.96, side: THREE.DoubleSide, depthWrite: false,
-  }), 0);
-  holo.add(mainPanel);
-  // thin orange edge frames
-  const frameTop = holoStrip(0.006, ARC_R + 0.002, new THREE.MeshBasicMaterial({ color: 0xE85A3F, transparent: true, opacity: 0.8 }), 0.235);
-  const frameBottom = frameTop.clone(); frameBottom.position.y = -0.235;
-  holo.add(frameTop, frameBottom);
+  /* physical transparent display standing on the console
+     hierarchy: futureScreenRoot ─ stand · frame · glass · display */
+  const futureScreenRoot = new THREE.Group();
+  futureScreenRoot.position.set(-0.12, DESK_Y + 0.105, -0.06);
+  futureScreenRoot.rotation.x = -0.05;
+  const PANE_W = 0.98, PANE_H = 0.56;
 
-  // secondary panels
+  const frameMat2 = new THREE.MeshStandardMaterial({ color: 0x2e2a24, metalness: 0.85, roughness: 0.35 });
+  const frameT = new THREE.Mesh(new THREE.BoxGeometry(PANE_W + 0.05, 0.03, 0.035), frameMat2);
+  frameT.position.set(0, PANE_H / 2 + 0.015, 0);
+  const frameB = frameT.clone(); frameB.position.y = -PANE_H / 2 - 0.015;
+  const frameLf = new THREE.Mesh(new THREE.BoxGeometry(0.03, PANE_H + 0.05, 0.035), frameMat2);
+  frameLf.position.set(-PANE_W / 2 - 0.015, 0, 0);
+  const frameRt = frameLf.clone(); frameRt.position.x = PANE_W / 2 + 0.015;
+  futureScreenRoot.add(frameT, frameB, frameLf, frameRt);
+
+  const paneGlass = new THREE.Mesh(new THREE.PlaneGeometry(PANE_W, PANE_H), MAT.glass);
+  paneGlass.position.z = 0.002;
+  futureScreenRoot.add(paneGlass);
+  // dark screen backing so the orange UI stays readable on the cream wall
+  const paneBacking = new THREE.Mesh(
+    new THREE.PlaneGeometry(PANE_W - 0.05, PANE_H - 0.06),
+    new THREE.MeshStandardMaterial({ color: 0x211e1a, roughness: 0.4, metalness: 0.3 })
+  );
+  paneBacking.position.z = 0.004;
+  futureScreenRoot.add(paneBacking);
+  const paneDisplay = new THREE.Mesh(
+    new THREE.PlaneGeometry(PANE_W - 0.05, PANE_H - 0.06),
+    new THREE.MeshBasicMaterial({ map: holoMain.texture, transparent: true, side: THREE.DoubleSide })
+  );
+  paneDisplay.position.z = 0.006;
+  futureScreenRoot.add(paneDisplay);
+  // stand stem + foot (grounded on the console)
+  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.1, 0.03), frameMat2);
+  stem.position.set(0, -PANE_H / 2 - 0.03 - 0.05, -0.01);
+  stem.castShadow = true;
+  futureScreenRoot.add(stem);
+  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.015, 0.16), MAT.alu);
+  foot.position.set(0, -PANE_H / 2 - 0.03 - 0.107, -0.01);
+  foot.castShadow = true;
+  futureScreenRoot.add(foot);
+  // small orange status light on the frame
+  const paneLed = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.006, 0.01), MAT.accent);
+  paneLed.position.set(PANE_W / 2 - 0.09, PANE_H / 2 + 0.015, 0.012);
+  futureScreenRoot.add(paneLed);
+  scene.add(futureScreenRoot);
+
+  /* floating holographic layer (secondary panels + city + print status) */
+  const holo = new THREE.Group();
   function sidePanel(w, h, tex, x, y, z, ry) {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({
       map: tex, transparent: true, opacity: 0.94, side: THREE.DoubleSide, depthWrite: false,
@@ -587,7 +617,7 @@ export function buildScene(container, opts = {}) {
     p.rotation.y = ry;
     return p;
   }
-  const sidePanelL = sidePanel(0.46, 0.32, holoSide.texture, -0.56, 0.05, 0.02, 0.5);
+  const sidePanelL = sidePanel(0.46, 0.32, holoSide.texture, -0.52, 0.34, 0.14, 0.42);
   holo.add(sidePanelL);
 
   // floating holographic city model (between the panels)
@@ -614,10 +644,10 @@ export function buildScene(container, opts = {}) {
   grid.rotation.x = -Math.PI / 2;
   grid.position.y = 0.001;
   holoCity.add(grid);
-  holoCity.position.set(0.12, 0.06, 0.06);
+  holoCity.position.set(0.3, 0.22, 0.12);
   holo.add(holoCity);
 
-  holo.position.set(-0.12, DESK_Y + 0.62, 0.18);
+  holo.position.set(-0.12, DESK_Y + 0.30, 0.12);
   scene.add(holo);
 
   // hologram light onto the desk
@@ -821,6 +851,56 @@ export function buildScene(container, opts = {}) {
   });
 
   /* ============================================================
+   03b · SMARTPHONE (hotspot: contact)
+   ============================================================ */
+  function phoneScreenTex() {
+    return makeTex(256, 512, (x, w, h) => {
+      x.fillStyle = '#14120f'; x.fillRect(0, 0, w, h);
+      x.fillStyle = 'rgba(232,90,63,0.12)'; x.fillRect(0, 0, w, 120);
+      x.fillStyle = ORANGE; x.font = `600 26px ${TECH}`;
+      x.fillText('12:45', 88, 56);
+      x.fillStyle = '#FFFDF7'; x.font = `500 15px ${TECH}`;
+      x.fillText('MA YING YUEN', 22, 158);
+      x.fillStyle = 'rgba(255,253,247,0.6)'; x.font = `500 13px ${TECH}`;
+      x.fillText('STEM STUDENT · HK', 22, 182);
+      // contact notification card
+      x.fillStyle = 'rgba(255,253,247,0.12)';
+      x.beginPath(); x.roundRect(16, 210, w - 32, 84, 12); x.fill();
+      x.strokeStyle = 'rgba(232,90,63,0.7)'; x.lineWidth = 2;
+      x.beginPath(); x.roundRect(16, 210, w - 32, 84, 12); x.stroke();
+      x.fillStyle = ORANGE; x.font = `600 14px ${TECH}`;
+      x.fillText('✆ CONTACT', 28, 238);
+      x.fillStyle = '#FFFDF7'; x.font = `500 13px ${TECH}`;
+      x.fillText('yingyuenma.alanhk@gmail.com', 28, 262);
+      x.fillText('wa.me/85264399498', 28, 282);
+      // dock
+      x.fillStyle = 'rgba(255,253,247,0.1)';
+      x.beginPath(); x.roundRect(16, h - 66, w - 32, 50, 14); x.fill();
+      x.fillStyle = ORANGE;
+      [54, 106, 158, 210].forEach((cx) => { x.beginPath(); x.arc(cx, h - 41, 11, 0, 7); x.fill(); });
+    });
+  }
+  const phone = new THREE.Group();
+  const phoneBody = new THREE.Mesh(new THREE.BoxGeometry(0.072, 0.009, 0.15), MAT.charcoal);
+  phoneBody.position.y = 0.0045;
+  phoneBody.castShadow = true;
+  phone.add(phoneBody);
+  const phoneScreen = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.064, 0.138),
+    new THREE.MeshBasicMaterial({ map: phoneScreenTex() })
+  );
+  phoneScreen.rotation.x = -Math.PI / 2;
+  phoneScreen.position.y = 0.0095;
+  phone.add(phoneScreen);
+  // subtle screen glow onto the desk
+  const phoneGlow = new THREE.PointLight(0xFFC9A8, 0.12, 0.28, 2);
+  phoneGlow.position.set(0, 0.05, 0);
+  phone.add(phoneGlow);
+  phone.position.set(0.74, DESK_Y, 0.24);
+  phone.rotation.y = -0.5;
+  scene.add(phone);
+
+  /* ============================================================
    04 · DESK LAMP (identity + key light)
    ============================================================ */
   const lamp = new THREE.Group();
@@ -1004,18 +1084,21 @@ export function buildScene(container, opts = {}) {
   function registerHotspot(obj, id) {
     obj.traverse((o) => { if (o.isMesh) hotspots.push({ mesh: o, id }); });
   }
+  registerHotspot(futureScreenRoot, 'monitor');
   registerHotspot(holo, 'monitor');
   registerHotspot(console0, 'monitor');
   registerHotspot(kbGroup, 'keyboard');
   registerHotspot(card, 'card');
+  registerHotspot(phone, 'phone');
   registerHotspot(notepad, 'board');
   registerHotspot(clipboard, 'photos');
   registerHotspot(lamp, 'lamp');
 
   const anchors = {
-    monitor: new THREE.Vector3(-0.12, DESK_Y + 0.98, 0.2),
+    monitor: new THREE.Vector3(-0.12, DESK_Y + 0.72, 0.0),
     keyboard: new THREE.Vector3(0.02, DESK_Y + 0.14, 0.5),
     card: new THREE.Vector3(0.4, DESK_Y + 0.14, 0.56),
+    phone: new THREE.Vector3(0.74, DESK_Y + 0.16, 0.24),
     board: new THREE.Vector3(-0.62, DESK_Y + 0.12, 0.58),
     photos: new THREE.Vector3(-0.98, DESK_Y + 0.14, 0.32),
   };
@@ -1049,15 +1132,80 @@ export function buildScene(container, opts = {}) {
     lampBulb.intensity = on ? 1.6 : 0;
   }
 
+  /* ---------- scene control (OFF by default) ---------- */
+  let sceneControlOn = false;
+  const HOME = { radius: IS_MOBILE ? 4.9 : 3.62, theta: 0, phi: 1.34, tx: 0.12, ty: 1.24, tz: 0.05 };
+  const FRAME = {
+    monitor: { theta: 0.0, phi: 1.36, radius: 3.1, tx: -0.12, ty: 1.3 },
+    keyboard: { theta: 0.02, phi: 1.3, radius: 2.5, tx: 0.02, ty: 1.0 },
+    card: { theta: 0.28, phi: 1.36, radius: 2.5, tx: 0.35, ty: 1.0 },
+    phone: { theta: 0.3, phi: 1.32, radius: 2.3, tx: 0.6, ty: 0.98 },
+    board: { theta: -0.3, phi: 1.36, radius: 2.6, tx: -0.55, ty: 1.0 },
+    photos: { theta: -0.5, phi: 1.38, radius: 2.6, tx: -0.9, ty: 1.0 },
+  };
+  let savedView = null;
+
+  function resetView() {
+    S.tRadius = HOME.radius; S.tTheta = HOME.theta; S.tPhi = HOME.phi;
+    target.set(HOME.tx, HOME.ty, HOME.tz);
+    savedView = null;
+  }
+  function frameDevice(id) {
+    const f = FRAME[id];
+    if (!f) return;
+    if (!savedView) savedView = {
+      radius: S.tRadius, theta: S.tTheta, phi: S.tPhi, tx: target.x, ty: target.y, tz: target.z,
+    };
+    S.tRadius = f.radius; S.tTheta = f.theta; S.tPhi = f.phi;
+    target.set(f.tx, f.ty, target.z);
+  }
+  function restoreView() {
+    setTourDevice(null);
+    if (savedView) {
+      S.tRadius = savedView.radius; S.tTheta = savedView.theta; S.tPhi = savedView.phi;
+      target.set(savedView.tx, savedView.ty, savedView.tz);
+      savedView = null;
+    } else {
+      resetView();
+    }
+  }
+  function setSceneControl(on) { sceneControlOn = on; }
+
+  /* tour highlight marker (billboard ring at the device anchor) */
+  const tourMarker = new THREE.Mesh(
+    new THREE.RingGeometry(0.075, 0.095, 40),
+    new THREE.MeshBasicMaterial({ color: 0xE85A3F, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false })
+  );
+  tourMarker.visible = false;
+  scene.add(tourMarker);
+  let tourDeviceId = null;
+  function setTourDevice(id) {
+    tourDeviceId = id;
+    tourMarker.visible = !!id && !!anchors[id];
+    if (id && anchors[id]) tourMarker.position.copy(anchors[id]);
+  }
+
   const el = renderer.domElement;
+  /* --- camera drag / zoom / pan — only when Scene Control is ON --- */
+  let pinchDist = 0;
+  const activePtrs = new Map();
+
   el.addEventListener('pointermove', (e) => {
-    if (S.dragging) {
-      S.tTheta = THREE.MathUtils.clamp(S.tTheta + (e.clientX - S.lastX) * 0.0035, -0.85, 0.85);
-      S.tPhi = THREE.MathUtils.clamp(S.tPhi - (e.clientY - S.lastY) * 0.0028, 0.98, 1.48);
+    if (S.dragging && sceneControlOn) {
+      if (S.panMode) {
+        // pan: move the orbit target within safe bounds
+        const dx = (e.clientX - S.lastX) * 0.0016 * (S.radius / 3.6);
+        const dy = (e.clientY - S.lastY) * 0.0016 * (S.radius / 3.6);
+        target.x = THREE.MathUtils.clamp(target.x - dx, -0.9, 1.1);
+        target.y = THREE.MathUtils.clamp(target.y + dy, 0.7, 1.8);
+      } else {
+        S.tTheta = THREE.MathUtils.clamp(S.tTheta + (e.clientX - S.lastX) * 0.0035, -0.85, 0.85);
+        S.tPhi = THREE.MathUtils.clamp(S.tPhi - (e.clientY - S.lastY) * 0.0028, 0.98, 1.48);
+      }
       S.lastX = e.clientX; S.lastY = e.clientY;
       return;
     }
-    if (!IS_MOBILE) {
+    if (!IS_MOBILE && sceneControlOn) {
       S.parX = (e.clientX / window.innerWidth) * 2 - 1;
       S.parY = (e.clientY / window.innerHeight) * 2 - 1;
     }
@@ -1066,22 +1214,45 @@ export function buildScene(container, opts = {}) {
     if (id !== hovered) {
       hovered = id;
       onHover(id);
-      el.style.cursor = id ? 'pointer' : 'grab';
+      el.style.cursor = id ? 'pointer' : (sceneControlOn ? 'grab' : 'default');
     }
   });
   el.addEventListener('pointerdown', (e) => {
-    S.dragging = true;
-    S.lastX = S.downX = e.clientX; S.lastY = S.downY = e.clientY;
-    S.downT = performance.now();
-    el.setPointerCapture(e.pointerId);
-    el.style.cursor = 'grabbing';
+    activePtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (activePtrs.size === 2 && sceneControlOn) {
+      // pinch-zoom begins: cancel any drag
+      S.dragging = false; S.panMode = false;
+      const pts = [...activePtrs.values()];
+      pinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      return;
+    }
+    S.downX = e.clientX; S.downY = e.clientY; S.downT = performance.now();
+    S.dragging = sceneControlOn;               // camera drag only when ON
+    S.panMode = sceneControlOn && (e.button === 2 || e.ctrlKey);
+    S.lastX = e.clientX; S.lastY = e.clientY;
+    if (S.dragging) el.setPointerCapture(e.pointerId);
+    el.style.cursor = S.dragging ? 'grabbing' : (hovered ? 'pointer' : 'default');
   });
+  el.addEventListener('pointermove', (e) => {
+    if (!activePtrs.has(e.pointerId)) return;
+    activePtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (activePtrs.size === 2 && sceneControlOn) {
+      const pts = [...activePtrs.values()];
+      const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      S.tRadius = THREE.MathUtils.clamp(S.tRadius - (d - pinchDist) * 0.004, 3.0, 5.4);
+      pinchDist = d;
+    }
+  }, { passive: true });
   el.addEventListener('pointerup', (e) => {
-    S.dragging = false;
-    el.style.cursor = hovered ? 'pointer' : 'grab';
+    activePtrs.delete(e.pointerId);
+    const wasDragging = S.dragging;
+    S.dragging = false; S.panMode = false;
+    el.style.cursor = hovered ? 'pointer' : (sceneControlOn ? 'grab' : 'default');
     const moved = Math.hypot(e.clientX - S.downX, e.clientY - S.downY);
     const dt = performance.now() - S.downT;
-    if (moved < 9 && dt < 500) {
+    // drag-vs-click discrimination: only a still short press activates a device
+    if (!wasDragging && moved >= 9) return;
+    if (moved < 9 && dt < 600) {
       const hit = pick(e);
       if (hit) {
         if (hit.id === 'lamp') setLamp(!lampOn);
@@ -1089,8 +1260,10 @@ export function buildScene(container, opts = {}) {
       }
     }
   });
-  el.addEventListener('pointercancel', () => { S.dragging = false; });
+  el.addEventListener('pointercancel', (e) => { activePtrs.delete(e.pointerId); S.dragging = false; S.panMode = false; });
+  el.addEventListener('contextmenu', (e) => { if (sceneControlOn) e.preventDefault(); });
   el.addEventListener('wheel', (e) => {
+    if (!sceneControlOn) return;
     e.preventDefault();
     S.tRadius = THREE.MathUtils.clamp(S.tRadius + e.deltaY * 0.0016, 3.0, 5.4);
   }, { passive: false });
@@ -1141,6 +1314,18 @@ export function buildScene(container, opts = {}) {
     projAcc += dt;
     if (projAcc > 0.12) { projAcc = 0; projectHotspots(); }
 
+    // tour marker: billboard + gentle pulse
+    if (tourMarker.visible) {
+      tourMarker.lookAt(camera.position);
+      tourMarker.material.opacity = motionOn ? 0.7 + 0.3 * Math.sin(t * 4) : 0.85;
+      tourMarker.scale.setScalar(1 + (motionOn ? Math.sin(t * 4) * 0.08 : 0));
+    }
+    // scene control OFF: parallax decays to zero (stable scene)
+    if (!sceneControlOn) {
+      S.parX *= Math.exp(-3 * dt);
+      S.parY *= Math.exp(-3 * dt);
+    }
+
     if (motionOn) {
       printAcc += dt;
       const progress = (printAcc % 60) / 60;
@@ -1157,7 +1342,7 @@ export function buildScene(container, opts = {}) {
       holoSide.update(dt, true);
       wallScreen.update(dt, true);
       // holographic layer: float + respond to the cursor
-      holo.position.y = DESK_Y + 0.62 + Math.sin(t * 0.8) * 0.006;
+      holo.position.y = DESK_Y + 0.30 + Math.sin(t * 0.8) * 0.006;
       holo.rotation.y = S.parX * 0.05;
       holo.rotation.x = S.parY * 0.02;
       holoCity.rotation.y = t * 0.35;
@@ -1194,6 +1379,11 @@ export function buildScene(container, opts = {}) {
       S.introT = 0;
     },
     lamp: { toggle: () => { setLamp(!lampOn); return lampOn; } },
+    setSceneControl,
+    resetView,
+    frameDevice,
+    restoreView,
+    setTourDevice,
     pause() { running = false; cancelAnimationFrame(raf); },
     resume() { if (!running) { running = true; clock.getDelta(); tick(); } },
     setReduceMotion(v) { motionOn = !v; },
