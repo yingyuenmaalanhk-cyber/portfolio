@@ -430,6 +430,7 @@ export function closeTopWindow() {
 
 export function openProjectWindow(p) {
   const html = `
+    ${p.image ? `<img class="win-img" src="${p.image}" alt="${t({ en: p.labelEn, zh: p.labelZh })}" loading="lazy">` : ''}
     <div class="win-proj-title">${t({ en: p.titleEn, zh: p.titleZh })}<span class="win-badge">${p.badge}</span></div>
     <div class="win-chips">${p.chips.map((c) => `<span class="win-chip">${c}</span>`).join('')}</div>
     <ul>${p.bullets.map((b) => `<li>${t(b)}</li>`).join('')}</ul>
@@ -645,15 +646,23 @@ export function openApp(id) {
 /* ============================================================
    FLOATING HOTSPOT LABELS (3D → screen projection)
    ============================================================ */
-const HOT_MAP = { monitor: 'work', keyboard: 'skills', card: 'contact', board: 'profile', photos: 'moments' };
+const HOT_MAP = { monitor: 'work', keyboard: 'skills', card: 'contact', phone: 'contact', board: 'profile', photos: 'moments' };
+const HOT_ACTIONS = {
+  monitor: { en: 'Open Projects', zh: '打開作品' },
+  board: { en: 'Open Profile', zh: '打開簡介' },
+  keyboard: { en: 'Open Skills', zh: '打開技能' },
+  photos: { en: 'Open Moments', zh: '打開相簿' },
+  card: { en: 'Open Contact', zh: '打開聯絡' },
+  phone: { en: 'Open Contact', zh: '打開聯絡' },
+};
 
 export function renderHotLabels() {
   const root = $('#hotLabels');
   if (!root) return;
   root.innerHTML = Object.entries(HOT_MAP).map(([hot, appId]) => {
-    const app = APPS.find((a) => a.id === appId);
-    return `<button class="hlab" data-hot="${hot}" aria-label="${t({ en: app.en, zh: app.zh })}">
-      <span class="hl-dot"></span>${t({ en: app.en, zh: app.zh })}</button>`;
+    const action = t(HOT_ACTIONS[hot]);
+    return `<button class="hlab" data-hot="${hot}" aria-label="${action}">
+      <span class="hl-dot" aria-hidden="true"></span><span class="hl-txt">${action}</span></button>`;
   }).join('');
 }
 
@@ -675,11 +684,13 @@ export function initHotLabels() {
 export function handleProject(positions) {
   const root = $('#hotLabels');
   if (!root || document.body.classList.contains('overlay-open') ||
-      document.body.classList.contains('tour-open') ||
       !document.getElementById('boot').classList.contains('done')) {
     return;
   }
+  // during the tour only the highlighted device's affordance is visible
+  const tourId = document.body.classList.contains('tour-open') ? window.__tourDevice : null;
   $$('.hlab', root).forEach((b) => {
+    if (tourId && b.dataset.hot !== tourId) { b.style.opacity = '0'; b.style.pointerEvents = 'none'; return; }
     const p = positions[b.dataset.hot];
     if (!p || !p.visible) { b.style.opacity = '0'; b.style.pointerEvents = 'none'; return; }
     b.style.opacity = '1';
@@ -722,17 +733,37 @@ function closeWelcome() {
 }
 
 let tourIdx = -1;
+let uiSceneCtl = null;
 function tourSteps() {
   const steps = [{
     sel: '#idPanel',
-    title: t({ en: TOUR.identityEn, zh: TOUR.identityZh }),
-    body: t({ en: TOUR.identityBodyEn, zh: TOUR.identityBodyZh }),
+    title: t({ en: '01 / IDENTITY', zh: '01 / 身份' }),
+    body: t({ en: 'This is where you learn who I am, what I study, and what I care about.', zh: '你在這裡認識我：姓名、學校、方向。' }),
+  }, {
+    sel: '#sceneChip',
+    title: t({ en: 'SCENE CONTROL', zh: '場景控制' }),
+    body: t({ en: 'Turn Scene Control ON to explore the 3D workspace — drag to rotate, wheel or pinch to zoom, right-drag to pan. Keep it OFF for a stable scene. You can also press Reset View.', zh: '開啟場景控制即可探索 3D 工作區——拖曳旋轉、滾輪或雙指縮放、右鍵平移。保持關閉則場景穩定。也可按「重置視角」。' }),
+  }, {
+    sel: '.hlab[data-hot="monitor"]', scene: 'monitor',
+    title: t({ en: '02 / WORK', zh: '02 / 作品' }),
+    body: t({ en: 'Click the main holographic screen to explore my projects.', zh: '點擊主全息屏幕，探索我的作品。' }),
+  }, {
+    sel: '.hlab[data-hot="board"]', scene: 'board',
+    title: t({ en: '03 / PROFILE', zh: '03 / 簡介' }),
+    body: t({ en: 'Click this board to learn more about me.', zh: '點擊這塊板，認識更多關於我的事。' }),
+  }, {
+    sel: '.hlab[data-hot="keyboard"]', scene: 'keyboard',
+    title: t({ en: '04 / SKILLS', zh: '04 / 技能' }),
+    body: t({ en: 'Click the keyboard to explore my skills and abilities.', zh: '點擊鍵盤，查看我的技能與能力。' }),
+  }, {
+    sel: '.hlab[data-hot="photos"]', scene: 'photos',
+    title: t({ en: '05 / MOMENTS', zh: '05 / 相簿' }),
+    body: t({ en: 'Click this device to explore my life and memorable moments.', zh: '點擊這個裝置，看我的生活與難忘時刻。' }),
+  }, {
+    sel: '.hlab[data-hot="card"]', scene: 'card',
+    title: t({ en: '06 / CONNECT', zh: '06 / 聯絡' }),
+    body: t({ en: 'Click the business card — or the phone on the desk — to open my contact information.', zh: '點擊名片——或桌面上的手機——打開我的聯絡方式。' }),
   }];
-  APPS.forEach((a) => steps.push({
-    sel: `#launcher .litem[data-app="${a.id}"]`,
-    title: `${a.num} / ${t({ en: a.en, zh: a.zh })}`,
-    body: t({ en: a.tourEn, zh: a.tourZh }),
-  }));
   return steps;
 }
 
@@ -750,6 +781,8 @@ function endTour() {
   tourIdx = -1;
   localStorage.setItem('my-welcome', '1');
   document.body.classList.remove('tour-open', 'launcher-open');
+  window.__tourDevice = null;
+  if (uiSceneCtl) { uiSceneCtl.setTourDevice(null); uiSceneCtl.restoreView(); }
   $$('.tour-hl').forEach((el) => el.classList.remove('tour-hl'));
 }
 
@@ -765,6 +798,14 @@ function renderTour() {
       // tour steps that point inside the launcher summon it first
       if (target.closest('#launcher')) document.body.classList.add('launcher-open');
       target.classList.add('tour-hl');
+    }
+    // device steps: frame the physical object in 3D + glow its marker
+    window.__tourDevice = step.scene || null;
+    if (step.scene && uiSceneCtl) {
+      uiSceneCtl.frameDevice(step.scene);
+      uiSceneCtl.setTourDevice(step.scene);
+    } else if (uiSceneCtl) {
+      uiSceneCtl.setTourDevice(null);
     }
     $('#tourTitle').textContent = step.title;
     $('#tourBody').textContent = step.body;
@@ -823,11 +864,13 @@ export function renderAll() {
 }
 
 export function initUI(sceneCtl) {
-  // hotspot dispatch
+  uiSceneCtl = sceneCtl;
+  // hotspot dispatch — the DEVICE_NAVIGATION map (scene id → app id)
   const actions = {
     monitor: openOS,
     keyboard: openSkills,
     card: openContact,
+    phone: openContact,
     board: openBoard,
     photos: openPhotos,
   };
@@ -956,6 +999,28 @@ export function initUI(sceneCtl) {
     if (sceneCtl) sceneCtl.setReduceMotion(!state.motion);
     blip('click');
   });
+
+  // scene control (OFF by default) + reset view
+  const sceneChip = $('#sceneChip');
+  const resetChip = $('#resetChip');
+  function syncSceneChip() {
+    const on = document.body.classList.contains('scene-on');
+    sceneChip.textContent = on ? '◉ SCENE: ON' : '◎ SCENE: OFF';
+    sceneChip.classList.toggle('on', on);
+    sceneChip.setAttribute('aria-pressed', String(on));
+    resetChip.hidden = !on;
+  }
+  sceneChip.addEventListener('click', () => {
+    blip('click');
+    const on = document.body.classList.toggle('scene-on');
+    if (sceneCtl) sceneCtl.setSceneControl(on);
+    syncSceneChip();
+  });
+  resetChip.addEventListener('click', () => {
+    blip('click');
+    if (sceneCtl) sceneCtl.resetView();
+  });
+  syncSceneChip();
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     state.motion = false;
     localStorage.setItem('my-motion', 'off');
