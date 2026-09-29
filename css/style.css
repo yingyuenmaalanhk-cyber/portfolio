@@ -226,6 +226,12 @@ body.no-cursor * { cursor: none !important; }
   backdrop-filter: blur(14px) brightness(0.72);
   -webkit-backdrop-filter: blur(14px) brightness(0.72);
 }
+/* RETRO-OS: keep project imagery vivid — lighter dimming, no wash-out */
+#osOverlay::before {
+  background: rgba(18, 16, 13, 0.45);
+  backdrop-filter: blur(9px) brightness(0.92);
+  -webkit-backdrop-filter: blur(9px) brightness(0.92);
+}
 .overlay.open {
   opacity: 1;
   visibility: visible;
@@ -574,7 +580,7 @@ body.overlay-open .hint-close { opacity: 1; pointer-events: auto; }
 .photo-cap { margin-top: 8px; text-align: center; }
 .photo-cap b { display: block; font-size: 13px; color: #3a3020; }
 .photo-cap span { font-size: 11px; color: #988e74; }
-.photo-item.prev, .photo-item.next { opacity: 0.45; filter: grayscale(0.6) brightness(0.85); }
+.photo-item.prev, .photo-item.next { opacity: 0.45; filter: brightness(0.85); }
 .photo-item.prev { transform: translateX(-72%) rotateY(28deg) rotateZ(-4deg) scale(0.82); }
 .photo-item.next { transform: translateX(72%) rotateY(-28deg) rotateZ(4deg) scale(0.82); }
 .photo-item.active { transform: translateX(0) rotateY(0) rotateZ(-1deg) scale(1); z-index: 3; }
@@ -826,6 +832,19 @@ body.overlay-open .hint-close { opacity: 1; pointer-events: auto; }
   padding: 13px 15px 10px;
   overflow-y: auto;
   max-height: 300px;
+}
+/* full-color project imagery (no desaturation anywhere in this path) */
+.win-img {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+  border-radius: 4px;
+  border: 1px solid #c9c5bc;
+  margin-bottom: 11px;
+  background: #e8e4da;
 }
 .win-proj-title {
   font-family: var(--tech);
@@ -1355,14 +1374,16 @@ body.tour-open .launcher { opacity: 1; pointer-events: auto; }
 }
 body.launcher-open .launcher-toggle { background: rgba(90, 40, 24, 0.95); }
 
-/* ---------- floating hotspot labels ---------- */
+/* ---------- physical-device affordances ----------
+   a small breathing dot marks each interactive device; the action
+   label appears on hover / keyboard focus / guided tour only */
 .hot-labels { position: fixed; inset: 0; z-index: 30000; pointer-events: none; }
 .hlab {
   position: absolute;
-  transform: translate(-50%, -130%);
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-family: var(--pixel);
   font-size: 6.5px;
   letter-spacing: 0.5px;
@@ -1370,17 +1391,33 @@ body.launcher-open .launcher-toggle { background: rgba(90, 40, 24, 0.95); }
   background: rgba(30, 27, 23, 0.9);
   border: 1px solid rgba(232, 90, 63, 0.5);
   border-radius: 20px;
-  padding: 5px 9px 4px;
+  padding: 9px 10px 8px;   /* ≥ touch target even in dot state */
   opacity: 0;
-  pointer-events: none;
+  pointer-events: auto;
   cursor: pointer;
-  transition: left 0.12s linear, top 0.12s linear, opacity 0.3s ease;
+  transition: left 0.12s linear, top 0.12s linear, opacity 0.3s ease,
+              background 0.18s ease, border-color 0.18s ease;
   text-shadow: 0 0 6px rgba(232, 90, 63, 0.5);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
+.hlab .hl-txt {
+  display: none;
+  font-family: var(--pixel);
+  font-size: 6.5px;
+  letter-spacing: 0.5px;
+}
+.hlab:hover, .hlab:focus-visible, .hlab.tour-hl {
+  background: rgba(90, 40, 24, 0.95);
+  border-color: var(--green);
+}
+.hlab:hover .hl-txt, .hlab:focus-visible .hl-txt, .hlab.tour-hl .hl-txt { display: inline; }
+.hlab:focus-visible {
+  outline: 2px dashed var(--accent-primary);
+  outline-offset: 3px;
+}
 .hlab:hover { background: rgba(90, 40, 24, 0.95); border-color: var(--green); }
 .hl-dot {
-  width: 5px; height: 5px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: var(--green);
   animation: hlPulse 1.6s infinite;
@@ -1389,8 +1426,7 @@ body.launcher-open .launcher-toggle { background: rgba(90, 40, 24, 0.95); }
   0%, 100% { box-shadow: 0 0 0 0 rgba(232, 90, 63, 0.7); }
   60% { box-shadow: 0 0 0 6px rgba(232, 90, 63, 0); }
 }
-body.overlay-open .hot-labels,
-body.tour-open .hot-labels { display: none; }
+body.overlay-open .hot-labels { display: none; }
 
 /* ---------- welcome dialog ---------- */
 .overlay.welcome { z-index: 58000; }
