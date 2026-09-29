@@ -91,7 +91,6 @@ export const PROJECTS = [
     descZh: '獲得 2025 年 1st Runner-up（亞軍）。帶領團隊利用空間數據分析解決實際城市問題，展現了與大學課程接軌的實踐能力。',
     link: 'https://github.com/yingyuenmaalanhk-cyber/Smart-City-Competition-2025',
     linkLabel: 'github.com/yingyuenmaalanhk-cyber/Smart-City-Competition-2025',
-    image: 'https://www.polyu.edu.hk/fce/-/media/department/fce/content/smart-city-event/smart-city-banner-2025_v2.jpg?mh=450&mw=1920',
     foot: '1st Runner-up · PolyU FCE · 2025',
   },
   {
