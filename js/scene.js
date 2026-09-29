@@ -154,6 +154,53 @@ class HoloSideScreen {
   }
 }
 
+/* --- right panel: GIS / spatial data --- */
+class HoloGisScreen {
+  constructor() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.width = 512; this.canvas.height = 352;
+    this.ctx = this.canvas.getContext('2d');
+    this.texture = new THREE.CanvasTexture(this.canvas);
+    this.texture.colorSpace = THREE.SRGBColorSpace;
+    this.t = 0;
+  }
+  update(dt, motion) {
+    this.t += dt;
+    const x = this.ctx, W = 512, H = 352;
+    x.clearRect(0, 0, W, H);
+    x.fillStyle = 'rgba(255,253,247,0.55)';
+    x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 14); x.fill();
+    x.strokeStyle = 'rgba(232,90,63,0.9)'; x.lineWidth = 2.5;
+    x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 14); x.stroke();
+    x.fillStyle = ORANGE_DEEP; x.font = `700 24px ${TECH}`;
+    x.fillText('GIS · SPATIAL VIEW', 24, 44);
+    x.fillStyle = 'rgba(37,34,30,0.92)'; x.font = `600 17px ${TECH}`;
+    x.fillText('QGIS DISTRICT LAYERS', 24, 78);
+    // map grid
+    x.strokeStyle = 'rgba(37,34,30,0.25)'; x.lineWidth = 1;
+    for (let gx = 24; gx <= W - 24; gx += 32) { x.beginPath(); x.moveTo(gx, 96); x.lineTo(gx, H - 60); x.stroke(); }
+    for (let gy = 96; gy <= H - 60; gy += 32) { x.beginPath(); x.moveTo(24, gy); x.lineTo(W - 24, gy); x.stroke(); }
+    // river + roads
+    x.strokeStyle = 'rgba(37,34,30,0.6)'; x.lineWidth = 4;
+    x.beginPath(); x.moveTo(24, 250); x.bezierCurveTo(160, 210, 320, 290, W - 24, 240); x.stroke();
+    x.lineWidth = 3;
+    x.beginPath(); x.moveTo(24, 150); x.lineTo(W - 24, 130); x.stroke();
+    // hotspots
+    const pts = [[110, 170], [230, 140], [330, 200], [420, 160], [180, 280], [380, 290]];
+    pts.forEach(([px, py], i) => {
+      const a = motion ? 0.5 + 0.5 * Math.abs(Math.sin(this.t * 1.6 + i)) : 0.9;
+      x.fillStyle = `rgba(232,90,63,${a})`;
+      x.beginPath(); x.arc(px, py, 5, 0, 7); x.fill();
+    });
+    // readout
+    x.fillStyle = 'rgba(37,34,30,0.85)'; x.font = `500 15px ${TECH}`;
+    x.fillText('layers: roads · flows · sensors', 24, H - 34);
+    x.fillStyle = ORANGE; x.font = `600 15px ${TECH}`;
+    x.fillText('+' + (motion ? Math.floor(40 + Math.sin(this.t) * 8) : 42) + ' SENSOR PINGS', 300, H - 34);
+    this.texture.needsUpdate = true;
+  }
+}
+
 /* --- printer mini display --- */
 class PrinterScreen {
   constructor() {
@@ -559,6 +606,7 @@ export function buildScene(container, opts = {}) {
   /* --- holographic screens --- */
   const holoMain = new HoloMainScreen();
   const holoSide = new HoloSideScreen();
+  const gisTex = new HoloGisScreen();
 
   /* physical transparent display standing on the console
      hierarchy: futureScreenRoot ─ stand · frame · glass · display */
@@ -617,10 +665,26 @@ export function buildScene(container, opts = {}) {
     p.rotation.y = ry;
     return p;
   }
-  const sidePanelL = sidePanel(0.46, 0.32, holoSide.texture, -0.52, 0.34, 0.14, 0.42);
-  holo.add(sidePanelL);
+  /* layered spatial displays — left diagnostics, right GIS, aux print status.
+     Each layer sits at a different depth and responds to parallax. */
+  const auxScreen = new PrinterScreen();
+  const holoPanels = []; // {mesh, baseX, baseY, depth, mat}
+  function holoPanel(w, h, tex, x, y, z, ry, depth) {
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex, transparent: true, opacity: 0.94, side: THREE.DoubleSide, depthWrite: false,
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    p.position.set(x, y, z);
+    p.rotation.y = ry;
+    holo.add(p);
+    holoPanels.push({ mesh: p, baseX: x, baseY: y, depth, mat });
+    return p;
+  }
+  holoPanel(0.46, 0.32, holoSide.texture, -0.52, 0.34, 0.10, 0.42, 0.6);   // left: AI diagnostics
+  holoPanel(0.44, 0.30, gisTex.texture, 0.56, 0.30, 0.06, -0.45, 1.0);     // right: GIS spatial panel
+  holoPanel(0.27, 0.135, auxScreen.texture, -0.42, -0.14, 0.14, 0.3, 1.4);   // aux: print status
 
-  // floating holographic city model (between the panels)
+  // floating holographic city model — the 3D engineering centrepiece (right side)
   const holoCity = new THREE.Group();
   const cityBlocks = [[-0.09, 0, 0.09], [-0.03, 0.03, 0.14], [0.04, -0.02, 0.07], [0.1, 0.02, 0.1], [-0.12, -0.03, 0.06], [0.02, 0.06, 0.05]];
   cityBlocks.forEach(([bx, bz, bh], i) => {
@@ -636,7 +700,6 @@ export function buildScene(container, opts = {}) {
     wire.position.copy(solid.position);
     holoCity.add(solid, wire);
   });
-  // ground grid under the model
   const grid = new THREE.Mesh(
     new THREE.PlaneGeometry(0.42, 0.42),
     new THREE.MeshBasicMaterial({ color: 0xB83E2A, wireframe: true, transparent: true, opacity: 0.45 })
@@ -644,7 +707,7 @@ export function buildScene(container, opts = {}) {
   grid.rotation.x = -Math.PI / 2;
   grid.position.y = 0.001;
   holoCity.add(grid);
-  holoCity.position.set(0.3, 0.22, 0.12);
+  holoCity.position.set(0.3, 0.22, 0.18);
   holo.add(holoCity);
 
   holo.position.set(-0.12, DESK_Y + 0.30, 0.12);
@@ -1338,13 +1401,24 @@ export function buildScene(container, opts = {}) {
       nozzle.position.x = printHead.position.x;
       nozzle.position.z = printHead.position.z;
       pScreen.update(progress);
+      auxScreen.update(progress);
       holoMain.update(dt, true);
       holoSide.update(dt, true);
+      gisTex.update(dt, true);
       wallScreen.update(dt, true);
       // holographic layer: float + respond to the cursor
       holo.position.y = DESK_Y + 0.30 + Math.sin(t * 0.8) * 0.006;
       holo.rotation.y = S.parX * 0.05;
       holo.rotation.x = S.parY * 0.02;
+      // per-layer depth parallax: nearer layers shift more
+      holoPanels.forEach(({ mesh, baseX, baseY, depth, mat }) => {
+        mesh.position.x = baseX + S.parX * 0.035 * depth;
+        mesh.position.y = baseY + S.parY * -0.02 * depth;
+        // hover on the workstation brightens every holographic layer
+        const target = hovered === 'monitor' ? 1 : 0.94;
+        mat.opacity += (target - mat.opacity) * Math.min(1, dt * 6);
+      });
+      holoGlow.intensity += (((hovered === 'monitor' ? 1.1 : 0.7)) - holoGlow.intensity) * Math.min(1, dt * 6);
       holoCity.rotation.y = t * 0.35;
       ring1.rotation.z = t * 0.6;
       ring2.rotation.z = -t * 0.45;
@@ -1363,7 +1437,9 @@ export function buildScene(container, opts = {}) {
     } else {
       holoMain.update(0, false);
       holoSide.update(0, false);
+      gisTex.update(0, false);
       wallScreen.update(0, false);
+      auxScreen.update(0.62);
       pScreen.update(0.62);
     }
 
