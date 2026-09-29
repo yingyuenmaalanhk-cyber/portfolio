@@ -74,7 +74,9 @@ export function setLang(lang) {
 /* ---------------- overlay manager ---------------- */
 let openOverlayId = null;
 export function overlayOpen(id) { return openOverlayId === id; }
+let lastFocused = null;
 export function openOverlay(id) {
+  lastFocused = document.activeElement;
   if (openOverlayId) closeOverlay(true);
   const ov = $('#' + id);
   if (!ov) return;
@@ -95,6 +97,28 @@ export function closeOverlay(silent = false) {
   document.body.classList.remove('overlay-open');
   openOverlayId = null;
   if (!silent) blip('close');
+  // restore focus to the control that opened the dialog
+  if (lastFocused && lastFocused.isConnected && lastFocused !== document.body) {
+    lastFocused.focus({ preventScroll: true });
+  }
+  lastFocused = null;
+}
+
+/* keep Tab focus inside the open dialog (simple focus trap) */
+export function trapOverlayFocus(e) {
+  if (!openOverlayId || e.key !== 'Tab') return;
+  const ov = $('#' + openOverlayId);
+  if (!ov) return;
+  const focusables = $$('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])', ov)
+    .filter((el) => el.offsetParent !== null || el === document.activeElement);
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault(); last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault(); first.focus();
+  }
 }
 
 /* ============================================================
@@ -245,7 +269,7 @@ export function renderPhotos() {
     if (i === photoIdx) rel = 'active';
     else if (i === (photoIdx + 1) % PHOTOS.length) rel = 'next';
     return `
-    <figure class="photo-item ${rel}" data-i="${i}">
+    <figure class="photo-item ${rel}" data-i="${i}" tabindex="0" role="button" aria-label="${t({ en: p.titleEn, zh: p.titleZh })}">
       <img src="${p.src}" alt="${t(p.titleEn ? { en: p.titleEn, zh: p.titleZh } : '')}" loading="lazy">
       <figcaption class="photo-cap">
         <b>${t({ en: p.titleEn, zh: p.titleZh })}</b>
@@ -253,11 +277,17 @@ export function renderPhotos() {
       </figcaption>
     </figure>`;
   }).join('');
-  $$('.photo-item', stage).forEach((el) => el.addEventListener('click', () => {
+  const activatePhoto = (el) => {
     const i = +el.dataset.i;
-    if (i !== photoIdx) { photoIdx = i; blip('click'); renderPhotos(); }
+    if (i !== photoIdx) { photoIdx = i; blip('click'); renderPhotos(); el.focus({ preventScroll: true }); }
     else window.open(PHOTOS[i].src, '_blank', 'noopener');
-  }));
+  };
+  $$('.photo-item', stage).forEach((el) => {
+    el.addEventListener('click', () => activatePhoto(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activatePhoto(el); }
+    });
+  });
   $('#albumDots').innerHTML = PHOTOS.map((_, i) =>
     `<i class="${i === photoIdx ? 'on' : ''}" data-i="${i}"></i>`).join('');
   $$('#albumDots i').forEach((d) => d.addEventListener('click', () => {
@@ -502,6 +532,20 @@ function bindAwardTabs(root) {
   const body = awardBodyOf(root);
   if (!body) return;
   $$('.aw-tab', body).forEach((b) => b.addEventListener('click', () => setAwardTab(+b.dataset.t, body)));
+  // arrow-key navigation across the tablist
+  const tablist = $('.aw-tabs', body);
+  if (tablist && !tablist.dataset.arrows) {
+    tablist.dataset.arrows = '1';
+    tablist.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const tabs = $$('.aw-tab', body);
+      const cur = tabs.findIndex((tb) => tb.classList.contains('active'));
+      const next = e.key === 'ArrowRight' ? (cur + 1) % tabs.length : (cur - 1 + tabs.length) % tabs.length;
+      setAwardTab(next, body);
+      $(`.aw-tab[data-t="${next}"]`, body).focus();
+      e.preventDefault();
+    });
+  }
 }
 
 /* full (re)initialization — used by every way of opening Awards */
@@ -812,6 +856,12 @@ function renderTour() {
     $('#tourProg').textContent = `STEP ${tourIdx + 1} / ${steps.length}`;
     $('#tourBack').style.visibility = tourIdx === 0 ? 'hidden' : 'visible';
     $('#tourNext').textContent = t({ en: TOUR.nextEn, zh: TOUR.nextZh });
+    // keyboard/AT: move focus to the step box so step changes are announced
+    const box = $('.tour-box');
+    if (box) {
+      if (!box.hasAttribute('tabindex')) box.setAttribute('tabindex', '-1');
+      box.focus({ preventScroll: true });
+    }
   } else {
     $('#tourTitle').textContent = t({ en: TOUR.doneTitleEn, zh: TOUR.doneTitleZh });
     $('#tourBody').textContent = t({ en: TOUR.doneEn, zh: TOUR.doneZh });
@@ -956,8 +1006,9 @@ export function initUI(sceneCtl) {
       }
     });
   });
-  // ESC closes topmost thing
+  // ESC closes topmost thing; Tab is trapped inside open dialogs
   window.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') { trapOverlayFocus(e); return; }
     if (e.key !== 'Escape') return;
     if (document.body.classList.contains('tour-open')) { tourSkip(); return; }
     if ($('#welcomeOverlay').classList.contains('open')) { closeWelcome(); return; }
