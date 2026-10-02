@@ -54,23 +54,23 @@ class HoloMainScreen {
     const x = this.ctx, W = 1024, H = 512;
     x.clearRect(0, 0, W, H);
     // translucent warm panel
-    x.fillStyle = 'rgba(255,253,247,0.55)';
+    x.fillStyle = 'rgba(6,24,38,0.72)';
     x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 18); x.fill();
-    x.strokeStyle = 'rgba(232,90,63,0.95)'; x.lineWidth = 3;
+    x.strokeStyle = 'rgba(79,216,255,0.95)'; x.lineWidth = 3;
     x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 18); x.stroke();
     // header
-    x.fillStyle = ORANGE_DEEP; x.font = `700 30px ${TECH}`;
+    x.fillStyle = '#7FE3FF'; x.font = `700 30px ${TECH}`;
     x.fillText('DISTRICT 07 · DIGITAL TWIN', 30, 52);
     x.fillStyle = 'rgba(255,253,247,0.85)'; x.font = `500 20px ${TECH}`;
     x.fillText('MA YING YUEN — SPATIAL LAB', 560, 52);
-    x.fillStyle = ORANGE_DEEP; x.fillText('● LIVE', 920, 52);
+    x.fillStyle = '#7FE3FF'; x.fillText('● LIVE', 920, 52);
     // map area
     x.fillStyle = 'rgba(255,253,247,0.07)'; x.fillRect(30, 84, 560, 330);
-    x.strokeStyle = 'rgba(232,90,63,0.3)'; x.lineWidth = 1;
+    x.strokeStyle = 'rgba(79,216,255,0.3)'; x.lineWidth = 1;
     for (let gx = 30; gx <= 590; gx += 40) { x.beginPath(); x.moveTo(gx, 84); x.lineTo(gx, 414); x.stroke(); }
     for (let gy = 84; gy <= 414; gy += 40) { x.beginPath(); x.moveTo(30, gy); x.lineTo(590, gy); x.stroke(); }
     // roads
-    x.strokeStyle = 'rgba(37,34,30,0.75)'; x.lineWidth = 6;
+    x.strokeStyle = 'rgba(180,230,255,0.75)'; x.lineWidth = 6;
     x.beginPath(); x.moveTo(30, 210); x.lineTo(590, 170); x.stroke();
     x.beginPath(); x.moveTo(30, 350); x.lineTo(590, 385); x.stroke();
     x.beginPath(); x.moveTo(210, 84); x.lineTo(310, 414); x.stroke();
@@ -81,20 +81,20 @@ class HoloMainScreen {
       const bw = 46, bh = 34, hgt = 14 + (i % 4) * 8;
       x.fillStyle = 'rgba(255,253,247,0.6)';
       x.fillRect(bx, by - hgt, bw, bh);
-      x.strokeStyle = ORANGE_DEEP; x.lineWidth = 2.5;
+      x.strokeStyle = '#7FE3FF'; x.lineWidth = 2.5;
       x.strokeRect(bx, by - hgt, bw, bh);
       x.beginPath(); x.moveTo(bx, by - hgt); x.lineTo(bx + 10, by - hgt - 10); x.lineTo(bx + bw + 10, by - hgt - 10); x.lineTo(bx + bw, by - hgt); x.stroke();
       x.beginPath(); x.moveTo(bx + bw, by - hgt); x.lineTo(bx + bw + 10, by - hgt - 10); x.lineTo(bx + bw + 10, by - 10); x.lineTo(bx + bw, by); x.stroke();
     });
     for (const d of this.dots) {
       const a = motion ? 0.4 + 0.6 * Math.abs(Math.sin(this.t * 1.4 + d.ph)) : 0.85;
-      x.fillStyle = `rgba(232,90,63,${a})`;
+      x.fillStyle = `rgba(79,216,255,${a})`;
       x.beginPath(); x.arc(d.x, d.y, d.r, 0, 7); x.fill();
     }
     const mx = 300 + Math.sin(this.t * 0.5) * 44, my = 250 + Math.cos(this.t * 0.4) * 28;
-    x.strokeStyle = ORANGE_DEEP; x.lineWidth = 2.5;
+    x.strokeStyle = '#7FE3FF'; x.lineWidth = 2.5;
     x.beginPath(); x.arc(mx, my, 12 + (motion ? (this.t % 1) * 14 : 5), 0, 7); x.stroke();
-    x.fillStyle = ORANGE_DEEP; x.beginPath(); x.arc(mx, my, 5, 0, 7); x.fill();
+    x.fillStyle = '#7FE3FF'; x.beginPath(); x.arc(mx, my, 5, 0, 7); x.fill();
     // right column — stats + commands
     x.fillStyle = 'rgba(255,253,247,0.8)'; x.font = `600 21px ${TECH}`;
     x.fillText('DISTRICT MONITOR', 630, 116);
@@ -102,8 +102,8 @@ class HoloMainScreen {
     bars.forEach(([lb, v], i) => {
       const by = 148 + i * 62;
       x.fillStyle = CHARCOAL; x.font = `500 18px ${TECH}`; x.fillText(lb, 630, by);
-      x.fillStyle = 'rgba(37,34,30,0.25)'; x.fillRect(630, by + 10, 330, 14);
-      x.fillStyle = ORANGE_DEEP; x.fillRect(630, by + 10, 330 * v, 14);
+      x.fillStyle = 'rgba(180,230,255,0.25)'; x.fillRect(630, by + 10, 330, 14);
+      x.fillStyle = '#7FE3FF'; x.fillRect(630, by + 10, 330 * v, 14);
     });
     x.fillStyle = 'rgba(184,62,42,0.85)'; x.font = `500 18px ${TECH}`;
     ['> python spatial_analysis.py', '> qgis --render district_07', '> arduino sensor_net --sync'].forEach((l, i) => x.fillText(l, 630, 424 + i * 27));
@@ -125,28 +125,28 @@ class HoloSideScreen {
     this.t += dt;
     const x = this.ctx, W = 512, H = 352;
     x.clearRect(0, 0, W, H);
-    x.fillStyle = 'rgba(255,253,247,0.55)';
+    x.fillStyle = 'rgba(6,24,38,0.72)';
     x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 14); x.fill();
-    x.strokeStyle = 'rgba(232,90,63,0.95)'; x.lineWidth = 2.5;
+    x.strokeStyle = 'rgba(79,216,255,0.95)'; x.lineWidth = 2.5;
     x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 14); x.stroke();
-    x.fillStyle = ORANGE_DEEP; x.font = `700 24px ${TECH}`;
+    x.fillStyle = '#7FE3FF'; x.font = `700 24px ${TECH}`;
     x.fillText('AI DIAGNOSTICS', 24, 44);
     x.fillStyle = 'rgba(255,253,247,0.85)'; x.font = `500 17px ${TECH}`;
     ['> sensors: 42 online', '> model: digital_twin_v3', '> latency: 12 ms', '> status: NOMINAL'].forEach((l, i) => {
-      x.fillStyle = i === 3 ? ORANGE : 'rgba(37,34,30,0.75)';
+      x.fillStyle = i === 3 ? '#4FD8FF' : 'rgba(180,230,255,0.75)';
       x.fillText(l, 24, 84 + i * 28);
     });
     // timeline (real milestones from the portfolio)
-    x.fillStyle = ORANGE_DEEP; x.font = `700 20px ${TECH}`;
+    x.fillStyle = '#7FE3FF'; x.font = `700 20px ${TECH}`;
     x.fillText('JOURNEY', 24, 218);
     const marks = [['2022', 'leadership'], ['2023', 'caltex robotics'], ['2024', 'GBA awards'], ['2025', 'polyU · CUHK']];
     marks.forEach(([yr, lb], i) => {
       const my = 244 + i * 26;
-      x.fillStyle = ORANGE_DEEP; x.beginPath(); x.arc(34, my - 6, 4, 0, 7); x.fill();
+      x.fillStyle = '#7FE3FF'; x.beginPath(); x.arc(34, my - 6, 4, 0, 7); x.fill();
       x.fillStyle = CHARCOAL; x.font = `600 17px ${TECH}`; x.fillText(yr, 48, my);
-      x.fillStyle = 'rgba(37,34,30,0.85)'; x.font = `600 16px ${TECH}`; x.fillText(lb, 110, my);
+      x.fillStyle = 'rgba(180,230,255,0.85)'; x.font = `600 16px ${TECH}`; x.fillText(lb, 110, my);
       if (i < marks.length - 1) {
-        x.strokeStyle = 'rgba(232,90,63,0.4)'; x.lineWidth = 1.5;
+        x.strokeStyle = 'rgba(79,216,255,0.4)'; x.lineWidth = 1.5;
         x.beginPath(); x.moveTo(34, my); x.lineTo(34, my + 20); x.stroke();
       }
     });
@@ -168,20 +168,20 @@ class HoloGisScreen {
     this.t += dt;
     const x = this.ctx, W = 512, H = 352;
     x.clearRect(0, 0, W, H);
-    x.fillStyle = 'rgba(255,253,247,0.55)';
+    x.fillStyle = 'rgba(6,24,38,0.72)';
     x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 14); x.fill();
-    x.strokeStyle = 'rgba(232,90,63,0.9)'; x.lineWidth = 2.5;
+    x.strokeStyle = 'rgba(79,216,255,0.9)'; x.lineWidth = 2.5;
     x.beginPath(); x.roundRect(4, 4, W - 8, H - 8, 14); x.stroke();
-    x.fillStyle = ORANGE_DEEP; x.font = `700 24px ${TECH}`;
+    x.fillStyle = '#7FE3FF'; x.font = `700 24px ${TECH}`;
     x.fillText('GIS · SPATIAL VIEW', 24, 44);
-    x.fillStyle = 'rgba(37,34,30,0.92)'; x.font = `600 17px ${TECH}`;
+    x.fillStyle = 'rgba(180,230,255,0.92)'; x.font = `600 17px ${TECH}`;
     x.fillText('QGIS DISTRICT LAYERS', 24, 78);
     // map grid
-    x.strokeStyle = 'rgba(37,34,30,0.25)'; x.lineWidth = 1;
+    x.strokeStyle = 'rgba(180,230,255,0.25)'; x.lineWidth = 1;
     for (let gx = 24; gx <= W - 24; gx += 32) { x.beginPath(); x.moveTo(gx, 96); x.lineTo(gx, H - 60); x.stroke(); }
     for (let gy = 96; gy <= H - 60; gy += 32) { x.beginPath(); x.moveTo(24, gy); x.lineTo(W - 24, gy); x.stroke(); }
     // river + roads
-    x.strokeStyle = 'rgba(37,34,30,0.6)'; x.lineWidth = 4;
+    x.strokeStyle = 'rgba(180,230,255,0.6)'; x.lineWidth = 4;
     x.beginPath(); x.moveTo(24, 250); x.bezierCurveTo(160, 210, 320, 290, W - 24, 240); x.stroke();
     x.lineWidth = 3;
     x.beginPath(); x.moveTo(24, 150); x.lineTo(W - 24, 130); x.stroke();
@@ -189,13 +189,13 @@ class HoloGisScreen {
     const pts = [[110, 170], [230, 140], [330, 200], [420, 160], [180, 280], [380, 290]];
     pts.forEach(([px, py], i) => {
       const a = motion ? 0.5 + 0.5 * Math.abs(Math.sin(this.t * 1.6 + i)) : 0.9;
-      x.fillStyle = `rgba(232,90,63,${a})`;
+      x.fillStyle = `rgba(79,216,255,${a})`;
       x.beginPath(); x.arc(px, py, 5, 0, 7); x.fill();
     });
     // readout
-    x.fillStyle = 'rgba(37,34,30,0.85)'; x.font = `500 15px ${TECH}`;
+    x.fillStyle = 'rgba(180,230,255,0.85)'; x.font = `500 15px ${TECH}`;
     x.fillText('layers: roads · flows · sensors', 24, H - 34);
-    x.fillStyle = ORANGE; x.font = `600 15px ${TECH}`;
+    x.fillStyle = '#4FD8FF'; x.font = `600 15px ${TECH}`;
     x.fillText('+' + (motion ? Math.floor(40 + Math.sin(this.t) * 8) : 42) + ' SENSOR PINGS', 300, H - 34);
     this.texture.needsUpdate = true;
   }
@@ -213,16 +213,16 @@ class PrinterScreen {
   update(progress) {
     const x = this.ctx, W = 256, H = 128;
     x.clearRect(0, 0, W, H);
-    x.fillStyle = 'rgba(255,253,247,0.55)'; x.fillRect(0, 0, W, H);
-    x.strokeStyle = 'rgba(232,90,63,0.95)'; x.lineWidth = 2; x.strokeRect(1, 1, W - 2, H - 2);
-    x.fillStyle = ORANGE_DEEP; x.font = `700 17px ${TECH}`;
+    x.fillStyle = 'rgba(6,24,38,0.72)'; x.fillRect(0, 0, W, H);
+    x.strokeStyle = 'rgba(79,216,255,0.95)'; x.lineWidth = 2; x.strokeRect(1, 1, W - 2, H - 2);
+    x.fillStyle = '#7FE3FF'; x.font = `700 17px ${TECH}`;
     x.fillText('PRINTING', 14, 30);
-    x.fillStyle = 'rgba(37,34,30,0.92)'; x.font = `600 13px ${TECH}`;
+    x.fillStyle = 'rgba(180,230,255,0.92)'; x.font = `600 13px ${TECH}`;
     x.fillText('smart_city_model.gcode', 14, 54);
-    x.fillStyle = ORANGE_DEEP; x.font = `600 20px ${TECH}`;
+    x.fillStyle = '#7FE3FF'; x.font = `600 20px ${TECH}`;
     x.fillText(Math.floor(progress * 100) + '%', 200, 54);
-    x.fillStyle = 'rgba(37,34,30,0.3)'; x.fillRect(14, 78, 228, 12);
-    x.fillStyle = ORANGE; x.fillRect(14, 78, 228 * progress, 12);
+    x.fillStyle = 'rgba(180,230,255,0.3)'; x.fillRect(14, 78, 228, 12);
+    x.fillStyle = '#4FD8FF'; x.fillRect(14, 78, 228 * progress, 12);
     x.fillStyle = 'rgba(184,62,42,0.9)'; x.font = `500 12px ${TECH}`;
     x.fillText('LAYER ' + Math.max(1, Math.floor(progress * 42)) + ' / 42', 14, 112);
     this.texture.needsUpdate = true;
@@ -246,18 +246,18 @@ class WallScreen {
     const x = this.ctx, W = 512, H = 320;
     x.clearRect(0, 0, W, H);
     x.fillStyle = 'rgba(255,253,247,0.6)'; x.fillRect(0, 0, W, H);
-    x.strokeStyle = 'rgba(232,90,63,0.25)'; x.lineWidth = 1;
+    x.strokeStyle = 'rgba(79,216,255,0.25)'; x.lineWidth = 1;
     for (let gx = 0; gx <= W; gx += 32) { x.beginPath(); x.moveTo(gx, 0); x.lineTo(gx, H); x.stroke(); }
     for (let gy = 0; gy <= H; gy += 32) { x.beginPath(); x.moveTo(0, gy); x.lineTo(W, gy); x.stroke(); }
-    x.strokeStyle = 'rgba(37,34,30,0.7)'; x.lineWidth = 4;
+    x.strokeStyle = 'rgba(180,230,255,0.7)'; x.lineWidth = 4;
     x.beginPath(); x.moveTo(0, 110); x.lineTo(W, 80); x.stroke();
     x.beginPath(); x.moveTo(0, 230); x.lineTo(W, 260); x.stroke();
     x.beginPath(); x.moveTo(170, 0); x.lineTo(240, H); x.stroke();
     const px = 60 + ((this.t * 22) % (W - 80)), py = 100 + Math.sin(this.t * 0.8) * 18;
-    x.fillStyle = ORANGE_DEEP; x.beginPath(); x.arc(px, py, 6, 0, 7); x.fill();
+    x.fillStyle = '#7FE3FF'; x.beginPath(); x.arc(px, py, 6, 0, 7); x.fill();
     x.strokeStyle = 'rgba(184,62,42,0.5)';
     x.beginPath(); x.arc(px, py, 14, 0, 7); x.stroke();
-    x.fillStyle = ORANGE_DEEP; x.font = `700 18px ${TECH}`;
+    x.fillStyle = '#7FE3FF'; x.font = `700 18px ${TECH}`;
     x.fillText('LIVE · SPATIAL FEED', 16, 36);
     this.texture.needsUpdate = true;
   }
@@ -608,50 +608,41 @@ export function buildScene(container, opts = {}) {
   const holoSide = new HoloSideScreen();
   const gisTex = new HoloGisScreen();
 
-  /* physical transparent display standing on the console
-     hierarchy: futureScreenRoot ─ stand · frame · glass · display */
+  /* physical monitor arc standing on the console
+     hierarchy: futureScreenRoot - left / center / right lab monitors */
   const futureScreenRoot = new THREE.Group();
   futureScreenRoot.position.set(-0.12, DESK_Y + 0.105, -0.06);
-  futureScreenRoot.rotation.x = -0.05;
-  const PANE_W = 0.98, PANE_H = 0.56;
-
+  futureScreenRoot.rotation.x = -0.04;
   const frameMat2 = new THREE.MeshStandardMaterial({ color: 0x2e2a24, metalness: 0.85, roughness: 0.35 });
-  const frameT = new THREE.Mesh(new THREE.BoxGeometry(PANE_W + 0.05, 0.03, 0.035), frameMat2);
-  frameT.position.set(0, PANE_H / 2 + 0.015, 0);
-  const frameB = frameT.clone(); frameB.position.y = -PANE_H / 2 - 0.015;
-  const frameLf = new THREE.Mesh(new THREE.BoxGeometry(0.03, PANE_H + 0.05, 0.035), frameMat2);
-  frameLf.position.set(-PANE_W / 2 - 0.015, 0, 0);
-  const frameRt = frameLf.clone(); frameRt.position.x = PANE_W / 2 + 0.015;
-  futureScreenRoot.add(frameT, frameB, frameLf, frameRt);
-
-  const paneGlass = new THREE.Mesh(new THREE.PlaneGeometry(PANE_W, PANE_H), MAT.glass);
-  paneGlass.position.z = 0.002;
-  futureScreenRoot.add(paneGlass);
-  // dark screen backing so the orange UI stays readable on the cream wall
-  const paneBacking = new THREE.Mesh(
-    new THREE.PlaneGeometry(PANE_W - 0.05, PANE_H - 0.06),
-    new THREE.MeshStandardMaterial({ color: 0x211e1a, roughness: 0.4, metalness: 0.3 })
-  );
-  paneBacking.position.z = 0.004;
-  futureScreenRoot.add(paneBacking);
-  const paneDisplay = new THREE.Mesh(
-    new THREE.PlaneGeometry(PANE_W - 0.05, PANE_H - 0.06),
-    new THREE.MeshBasicMaterial({ map: holoMain.texture, transparent: true, side: THREE.DoubleSide })
-  );
-  paneDisplay.position.z = 0.006;
-  futureScreenRoot.add(paneDisplay);
-  // stand stem + foot (grounded on the console)
-  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.1, 0.03), frameMat2);
-  stem.position.set(0, -PANE_H / 2 - 0.03 - 0.05, -0.01);
+  function labMonitor(w, h, tex, x, y, z, ry) {
+    const g = new THREE.Group();
+    const bezel = new THREE.Mesh(new THREE.BoxGeometry(w + 0.045, h + 0.045, 0.03), frameMat2);
+    bezel.castShadow = true;
+    g.add(bezel);
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex }));
+    scr.position.z = 0.017;
+    g.add(scr);
+    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.14, 0.025), frameMat2);
+    stand.position.set(0, -h / 2 - 0.07, -0.012);
+    stand.castShadow = true;
+    g.add(stand);
+    g.position.set(x, y, z);
+    g.rotation.y = ry;
+    return g;
+  }
+  futureScreenRoot.add(labMonitor(0.98, 0.55, holoMain.texture, 0, 0.37, 0, 0));
+  futureScreenRoot.add(labMonitor(0.58, 0.34, holoSide.texture, -0.74, 0.31, -0.1, 0.55));
+  futureScreenRoot.add(labMonitor(0.58, 0.34, gisTex.texture, 0.74, 0.31, -0.1, -0.55));
+  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.12, 0.035), frameMat2);
+  stem.position.set(0, 0.05, -0.02);
   stem.castShadow = true;
   futureScreenRoot.add(stem);
-  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.015, 0.16), MAT.alu);
-  foot.position.set(0, -PANE_H / 2 - 0.03 - 0.107, -0.01);
+  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.015, 0.2), MAT.alu);
+  foot.position.set(0, -0.005, -0.02);
   foot.castShadow = true;
   futureScreenRoot.add(foot);
-  // small orange status light on the frame
-  const paneLed = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.006, 0.01), MAT.accent);
-  paneLed.position.set(PANE_W / 2 - 0.09, PANE_H / 2 + 0.015, 0.012);
+  const paneLed = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.006, 0.01), MAT.accent);
+  paneLed.position.set(0.37, 0.66, 0.02);
   futureScreenRoot.add(paneLed);
   scene.add(futureScreenRoot);
 
@@ -669,6 +660,13 @@ export function buildScene(container, opts = {}) {
      Each layer sits at a different depth and responds to parallax. */
   const auxScreen = new PrinterScreen();
   const holoPanels = []; // {mesh, baseX, baseY, depth, mat}
+  // large holographic projection floating above the monitor arc
+  const bigHolo = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.5, 0.75),
+    new THREE.MeshBasicMaterial({ map: holoMain.texture, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false })
+  );
+  bigHolo.position.set(0, 0.62, 0.14);
+  holo.add(bigHolo);
   function holoPanel(w, h, tex, x, y, z, ry, depth) {
     const mat = new THREE.MeshBasicMaterial({
       map: tex, transparent: true, opacity: 0.94, side: THREE.DoubleSide, depthWrite: false,
@@ -680,9 +678,9 @@ export function buildScene(container, opts = {}) {
     holoPanels.push({ mesh: p, baseX: x, baseY: y, depth, mat });
     return p;
   }
-  holoPanel(0.46, 0.32, holoSide.texture, -0.52, 0.34, 0.10, 0.42, 0.6);   // left: AI diagnostics
-  holoPanel(0.44, 0.30, gisTex.texture, 0.56, 0.30, 0.06, -0.45, 1.0);     // right: GIS spatial panel
-  holoPanel(0.27, 0.135, auxScreen.texture, -0.42, -0.14, 0.14, 0.3, 1.4);   // aux: print status
+  holoPanel(0.44, 0.31, holoSide.texture, -0.82, 0.02, 0.12, 0.5, 0.6);   // left: AI diagnostics
+  holoPanel(0.42, 0.29, gisTex.texture, 0.84, 0.02, 0.12, -0.5, 1.0);     // right: GIS spatial panel
+  holoPanel(0.27, 0.135, auxScreen.texture, -0.5, -0.28, 0.16, 0.3, 1.4);   // aux: print status
 
   // floating holographic city model — the 3D engineering centrepiece (right side)
   const holoCity = new THREE.Group();
@@ -707,10 +705,10 @@ export function buildScene(container, opts = {}) {
   grid.rotation.x = -Math.PI / 2;
   grid.position.y = 0.001;
   holoCity.add(grid);
-  holoCity.position.set(0.3, 0.22, 0.18);
+  holoCity.position.set(0.42, -0.28, 0.16);
   holo.add(holoCity);
 
-  holo.position.set(-0.12, DESK_Y + 0.30, 0.12);
+  holo.position.set(-0.12, DESK_Y + 0.98, -0.02);
   scene.add(holo);
 
   // hologram light onto the desk
@@ -1158,7 +1156,7 @@ export function buildScene(container, opts = {}) {
   registerHotspot(lamp, 'lamp');
 
   const anchors = {
-    monitor: new THREE.Vector3(-0.12, DESK_Y + 0.72, 0.0),
+    monitor: new THREE.Vector3(-0.12, DESK_Y + 1.15, 0.0),
     keyboard: new THREE.Vector3(0.02, DESK_Y + 0.14, 0.5),
     card: new THREE.Vector3(0.4, DESK_Y + 0.14, 0.56),
     phone: new THREE.Vector3(0.74, DESK_Y + 0.16, 0.24),
@@ -1199,7 +1197,7 @@ export function buildScene(container, opts = {}) {
   let sceneControlOn = false;
   const HOME = { radius: IS_MOBILE ? 4.9 : 3.62, theta: 0, phi: 1.34, tx: 0.12, ty: 1.24, tz: 0.05 };
   const FRAME = {
-    monitor: { theta: 0.0, phi: 1.36, radius: 3.1, tx: -0.12, ty: 1.3 },
+    monitor: { theta: 0.0, phi: 1.3, radius: 3.3, tx: -0.12, ty: 1.75 },
     keyboard: { theta: 0.02, phi: 1.3, radius: 2.5, tx: 0.02, ty: 1.0 },
     card: { theta: 0.28, phi: 1.36, radius: 2.5, tx: 0.35, ty: 1.0 },
     phone: { theta: 0.3, phi: 1.32, radius: 2.3, tx: 0.6, ty: 0.98 },
@@ -1407,7 +1405,7 @@ export function buildScene(container, opts = {}) {
       gisTex.update(dt, true);
       wallScreen.update(dt, true);
       // holographic layer: float + respond to the cursor
-      holo.position.y = DESK_Y + 0.30 + Math.sin(t * 0.8) * 0.006;
+      holo.position.y = DESK_Y + 0.98 + Math.sin(t * 0.8) * 0.006;
       holo.rotation.y = S.parX * 0.05;
       holo.rotation.x = S.parY * 0.02;
       // per-layer depth parallax: nearer layers shift more
