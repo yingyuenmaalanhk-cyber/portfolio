@@ -557,24 +557,6 @@ export function buildScene(container, opts = {}) {
 
   const DESK_Y = 0.865;
 
-  /* ----- decor: rug under the desk ----- */
-  const rugTex = makeTex(512, 320, (x, w, h) => {
-    x.fillStyle = '#e2d5bd'; x.fillRect(0, 0, w, h);
-    x.strokeStyle = 'rgba(180,150,110,0.6)'; x.lineWidth = 6;
-    x.strokeRect(14, 14, w - 28, h - 28);
-    x.strokeStyle = 'rgba(180,150,110,0.35)'; x.lineWidth = 2;
-    x.strokeRect(30, 30, w - 60, h - 60);
-    x.fillStyle = 'rgba(190,160,120,0.25)';
-    for (let i = 0; i < 24; i++) x.fillRect(40 + (i % 8) * 56, 48 + Math.floor(i / 8) * 66, 40, 40);
-  });
-  const rug = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.6, 1.7),
-    new THREE.MeshStandardMaterial({ map: rugTex, roughness: 0.95 })
-  );
-  rug.rotation.x = -Math.PI / 2;
-  rug.position.set(0, 0.004, 0.9);
-  rug.receiveShadow = true;
-  scene.add(rug);
 
   /* ============================================================
    01 · HOLOGRAPHIC WORKSTATION
@@ -598,20 +580,6 @@ export function buildScene(container, opts = {}) {
   const strip = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.006, 0.01), MAT.accent);
   strip.position.set(0, 0.056, 0.178);
   console0.add(strip);
-  // central emitter
-  const emitter = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.035, 24), MAT.charcoal);
-  emitter.position.set(0, 0.12, -0.02);
-  console0.add(emitter);
-  const emitterLed = new THREE.Mesh(new THREE.CylinderGeometry(0.046, 0.046, 0.006, 24), MAT.accent);
-  emitterLed.position.set(0, 0.14, -0.02);
-  console0.add(emitterLed);
-  // projection light cone
-  const cone = new THREE.Mesh(
-    new THREE.ConeGeometry(0.34, 0.42, 28, 1, true),
-    new THREE.MeshBasicMaterial({ color: 0xFFFDF7, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })
-  );
-  cone.position.set(0, 0.36, -0.02);
-  console0.add(cone);
   // gesture rings (visual metaphor only)
   const ring1 = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.004, 8, 40), new THREE.MeshBasicMaterial({ color: 0xE85A3F, transparent: true, opacity: 0.7 }));
   ring1.rotation.x = Math.PI / 2.3;
@@ -1013,13 +981,13 @@ export function buildScene(container, opts = {}) {
   scene.add(mug);
   // stack of reference books (left)
   const book1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 0.15), new THREE.MeshStandardMaterial({ color: 0x25221E, roughness: 0.7 }));
-  book1.position.set(-0.88, DESK_Y + 0.015, 0.5);
-  book1.rotation.y = 0.12;
+  book1.position.set(-1.12, DESK_Y + 0.015, 0.54);
+  book1.rotation.y = 0.1;
   book1.castShadow = true;
   scene.add(book1);
   const book2 = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.025, 0.13), new THREE.MeshStandardMaterial({ color: 0xE85A3F, roughness: 0.7 }));
-  book2.position.set(-0.87, DESK_Y + 0.042, 0.49);
-  book2.rotation.y = -0.08;
+  book2.position.set(-1.11, DESK_Y + 0.042, 0.53);
+  book2.rotation.y = -0.06;
   book2.castShadow = true;
   scene.add(book2);
 
@@ -1323,7 +1291,7 @@ export function buildScene(container, opts = {}) {
         target.y = THREE.MathUtils.clamp(target.y + dy, 0.7, 1.8);
       } else {
         S.tTheta = THREE.MathUtils.clamp(S.tTheta + (e.clientX - S.lastX) * 0.0035, -0.85, 0.85);
-        S.tPhi = THREE.MathUtils.clamp(S.tPhi - (e.clientY - S.lastY) * 0.0028, 0.98, 1.48);
+        S.tPhi = THREE.MathUtils.clamp(S.tPhi - (e.clientY - S.lastY) * 0.0028, 0.5, 1.6);
       }
       S.lastX = e.clientX; S.lastY = e.clientY;
       return;
@@ -1362,7 +1330,7 @@ export function buildScene(container, opts = {}) {
     if (activePtrs.size === 2 && sceneControlOn) {
       const pts = [...activePtrs.values()];
       const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      S.tRadius = THREE.MathUtils.clamp(S.tRadius - (d - pinchDist) * 0.004, 3.0, 5.4);
+      S.tRadius = THREE.MathUtils.clamp(S.tRadius - (d - pinchDist) * 0.004, 0.7, 11);
       pinchDist = d;
     }
   }, { passive: true });
@@ -1388,7 +1356,7 @@ export function buildScene(container, opts = {}) {
   el.addEventListener('wheel', (e) => {
     if (!sceneControlOn) return;
     e.preventDefault();
-    S.tRadius = THREE.MathUtils.clamp(S.tRadius + e.deltaY * 0.0016, 3.0, 5.4);
+    S.tRadius = THREE.MathUtils.clamp(S.tRadius + e.deltaY * 0.0016, 0.7, 11);
   }, { passive: false });
 
   /* ---------- resize ---------- */
