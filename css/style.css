@@ -1792,3 +1792,20 @@ body.reduce-motion .hlab { transition: opacity 0.3s ease; }
   #gateOverlay { transition: opacity 0.2s ease; }
 }
 body.reduce-motion .g-led { animation: none; }
+
+
+/* ---------- text size: 小 / 中 / 大 ---------- */
+body.font-md .ov-inner,
+body.font-md .launcher,
+body.font-md .id-panel,
+body.font-md .tour-box,
+body.font-md .welcome-box,
+body.font-md .gate-panel,
+body.font-md .sys-chips { zoom: 1.15; }
+body.font-lg .ov-inner,
+body.font-lg .launcher,
+body.font-lg .id-panel,
+body.font-lg .tour-box,
+body.font-lg .welcome-box,
+body.font-lg .gate-panel,
+body.font-lg .sys-chips { zoom: 1.32; }
