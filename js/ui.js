@@ -1051,6 +1051,25 @@ export function initUI(sceneCtl) {
     blip('click');
   });
 
+  // text size: 小 (default) -> 中 -> 大
+  const fontChip = $('#fontChip');
+  const FONT_STEPS = [{ cls: '', label: 'A: 小', name: '小' }, { cls: 'font-md', label: 'A: 中', name: '中' }, { cls: 'font-lg', label: 'A: 大', name: '大' }];
+  let fontIdx = Math.max(0, FONT_STEPS.findIndex((f) => f.cls === localStorage.getItem('my-font')));
+  function syncFont() {
+    document.body.classList.remove('font-md', 'font-lg');
+    const f = FONT_STEPS[fontIdx];
+    if (f.cls) document.body.classList.add(f.cls);
+    fontChip.textContent = f.label;
+    fontChip.setAttribute('aria-label', '文字大小：' + f.name);
+    localStorage.setItem('my-font', f.cls);
+  }
+  fontChip.addEventListener('click', () => {
+    blip('click');
+    fontIdx = (fontIdx + 1) % FONT_STEPS.length;
+    syncFont();
+  });
+  syncFont();
+
   // scene control (OFF by default) + reset view
   const sceneChip = $('#sceneChip');
   const resetChip = $('#resetChip');
