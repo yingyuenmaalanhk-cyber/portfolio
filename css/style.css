@@ -1182,7 +1182,7 @@ body.reduce-motion .overlay > .ov-inner { transition: none !important; }
   left: 16px;
   z-index: 40000;
   width: 252px;
-  background: linear-gradient(165deg, rgba(38, 35, 30, 0.93), rgba(28, 26, 22, 0.95));
+  background: linear-gradient(165deg, rgba(42, 38, 32, 0.94), rgba(26, 24, 20, 0.96));
   border: 1px solid rgba(232, 90, 63, 0.42);
   box-shadow: 0 0 24px rgba(46, 160, 70, 0.22), 0 14px 34px rgba(0, 0, 0, 0.5);
   border-radius: 8px;
@@ -1432,7 +1432,8 @@ body.overlay-open .hot-labels { display: none; }
 .overlay.welcome { z-index: 58000; }
 .welcome-box {
   width: min(520px, 92vw);
-  background: linear-gradient(170deg, var(--bg-secondary) 0%, #0f1912 100%);
+  background: linear-gradient(170deg, var(--bg-secondary) 0%, #15130f 100%);
+  border: 1px solid rgba(232, 90, 63, 0.35);
   border: 1px solid rgba(232, 90, 63, 0.5);
   border-radius: 10px;
   box-shadow: 0 0 50px rgba(46, 160, 70, 0.3), 0 30px 80px rgba(0, 0, 0, 0.7);
