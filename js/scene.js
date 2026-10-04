@@ -517,6 +517,9 @@ export function buildScene(container, opts = {}) {
 
   /* ----- lights (bright warm room) ----- */
   scene.add(new THREE.HemisphereLight(0xfff6e6, 0xcbbfa8, 1.05));
+  const ceiling = new THREE.PointLight(0xfff0d8, 0.7, 7, 1.5);
+  ceiling.position.set(0, 3.4, 1.4);
+  scene.add(ceiling);
   const fill = new THREE.DirectionalLight(0xfff2dc, 0.7);
   fill.position.set(2.4, 3.6, 3.2);
   scene.add(fill);
@@ -553,6 +556,25 @@ export function buildScene(container, opts = {}) {
   scene.add(beam);
 
   const DESK_Y = 0.865;
+
+  /* ----- decor: rug under the desk ----- */
+  const rugTex = makeTex(512, 320, (x, w, h) => {
+    x.fillStyle = '#e2d5bd'; x.fillRect(0, 0, w, h);
+    x.strokeStyle = 'rgba(180,150,110,0.6)'; x.lineWidth = 6;
+    x.strokeRect(14, 14, w - 28, h - 28);
+    x.strokeStyle = 'rgba(180,150,110,0.35)'; x.lineWidth = 2;
+    x.strokeRect(30, 30, w - 60, h - 60);
+    x.fillStyle = 'rgba(190,160,120,0.25)';
+    for (let i = 0; i < 24; i++) x.fillRect(40 + (i % 8) * 56, 48 + Math.floor(i / 8) * 66, 40, 40);
+  });
+  const rug = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.6, 1.7),
+    new THREE.MeshStandardMaterial({ map: rugTex, roughness: 0.95 })
+  );
+  rug.rotation.x = -Math.PI / 2;
+  rug.position.set(0, 0.004, 0.9);
+  rug.receiveShadow = true;
+  scene.add(rug);
 
   /* ============================================================
    01 · HOLOGRAPHIC WORKSTATION
@@ -667,6 +689,19 @@ export function buildScene(container, opts = {}) {
   );
   bigHolo.position.set(0, 0.62, 0.14);
   holo.add(bigHolo);
+  // soft glow pad behind the projection
+  const glowTex = makeTex(256, 128, (x, w, h) => {
+    const g = x.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, w / 2);
+    g.addColorStop(0, 'rgba(90,200,255,0.5)');
+    g.addColorStop(1, 'rgba(90,200,255,0)');
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+  });
+  const holoGlowPad = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.7, 0.95),
+    new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, opacity: 0.55, depthWrite: false })
+  );
+  holoGlowPad.position.set(0, 0.62, 0.12);
+  holo.add(holoGlowPad);
   function holoPanel(w, h, tex, x, y, z, ry, depth) {
     const mat = new THREE.MeshBasicMaterial({
       map: tex, transparent: true, opacity: 0.94, side: THREE.DoubleSide, depthWrite: false,
@@ -960,6 +995,33 @@ export function buildScene(container, opts = {}) {
   phone.position.set(0.74, DESK_Y, 0.24);
   phone.rotation.y = -0.5;
   scene.add(phone);
+
+  /* ----- coffee mug ----- */
+  const mug = new THREE.Group();
+  const mugBody = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.032, 0.075, 20), MAT.cream);
+  mugBody.position.y = 0.0375;
+  mugBody.castShadow = true;
+  mug.add(mugBody);
+  const mugStripe = new THREE.Mesh(new THREE.CylinderGeometry(0.0355, 0.0355, 0.018, 20), MAT.accent);
+  mugStripe.position.y = 0.045;
+  mug.add(mugStripe);
+  const mugHandle = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.006, 8, 16), MAT.cream);
+  mugHandle.position.set(0.042, 0.04, 0);
+  mugHandle.rotation.y = Math.PI / 2;
+  mug.add(mugHandle);
+  mug.position.set(0.5, DESK_Y, 0.3);
+  scene.add(mug);
+  // stack of reference books (left)
+  const book1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 0.15), new THREE.MeshStandardMaterial({ color: 0x25221E, roughness: 0.7 }));
+  book1.position.set(-0.88, DESK_Y + 0.015, 0.5);
+  book1.rotation.y = 0.12;
+  book1.castShadow = true;
+  scene.add(book1);
+  const book2 = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.025, 0.13), new THREE.MeshStandardMaterial({ color: 0xE85A3F, roughness: 0.7 }));
+  book2.position.set(-0.87, DESK_Y + 0.042, 0.49);
+  book2.rotation.y = -0.08;
+  book2.castShadow = true;
+  scene.add(book2);
 
   /* ============================================================
    04 · DESK LAMP (identity + key light)
