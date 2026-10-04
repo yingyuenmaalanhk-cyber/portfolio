@@ -580,15 +580,6 @@ export function buildScene(container, opts = {}) {
   const strip = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.006, 0.01), MAT.accent);
   strip.position.set(0, 0.056, 0.178);
   console0.add(strip);
-  // gesture rings (visual metaphor only)
-  const ring1 = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.004, 8, 40), new THREE.MeshBasicMaterial({ color: 0xE85A3F, transparent: true, opacity: 0.7 }));
-  ring1.rotation.x = Math.PI / 2.3;
-  ring1.position.set(0.3, 0.16, 0.1);
-  console0.add(ring1);
-  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.003, 8, 40), new THREE.MeshBasicMaterial({ color: 0xB83E2A, transparent: true, opacity: 0.4 }));
-  ring2.rotation.x = Math.PI / 1.9;
-  ring2.position.set(0.3, 0.2, 0.1);
-  console0.add(ring2);
 
   console0.position.set(-0.12, DESK_Y, 0.02);
   scene.add(console0);
@@ -683,31 +674,6 @@ export function buildScene(container, opts = {}) {
   holoPanel(0.42, 0.29, gisTex.texture, 0.84, 0.02, 0.12, -0.5, 1.0);     // right: GIS spatial panel
   holoPanel(0.27, 0.135, auxScreen.texture, 0.80, -0.70, 0.25, 0.3, 1.4);   // aux: print status (above printer)
 
-  // floating holographic city model — the 3D engineering centrepiece (right side)
-  const holoCity = new THREE.Group();
-  const cityBlocks = [[-0.09, 0, 0.09], [-0.03, 0.03, 0.14], [0.04, -0.02, 0.07], [0.1, 0.02, 0.1], [-0.12, -0.03, 0.06], [0.02, 0.06, 0.05]];
-  cityBlocks.forEach(([bx, bz, bh], i) => {
-    const solid = new THREE.Mesh(
-      new THREE.BoxGeometry(0.05, bh, 0.05),
-      new THREE.MeshBasicMaterial({ color: 0xFFB895, transparent: true, opacity: 0.55 })
-    );
-    solid.position.set(bx, bh / 2, bz);
-    const wire = new THREE.Mesh(
-      new THREE.BoxGeometry(0.05, bh, 0.05),
-      new THREE.MeshBasicMaterial({ color: 0xB83E2A, wireframe: true, transparent: true, opacity: 0.95 })
-    );
-    wire.position.copy(solid.position);
-    holoCity.add(solid, wire);
-  });
-  const grid = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.42, 0.42),
-    new THREE.MeshBasicMaterial({ color: 0xB83E2A, wireframe: true, transparent: true, opacity: 0.45 })
-  );
-  grid.rotation.x = -Math.PI / 2;
-  grid.position.y = 0.001;
-  holoCity.add(grid);
-  holoCity.position.set(1.16, -0.52, 0.18);
-  holo.add(holoCity);
 
   holo.position.set(-0.12, DESK_Y + 0.98, -0.02);
   scene.add(holo);
@@ -1439,9 +1405,6 @@ export function buildScene(container, opts = {}) {
         mat.opacity += (target - mat.opacity) * Math.min(1, dt * 6);
       });
       holoGlow.intensity += (((hovered === 'monitor' ? 1.1 : 0.7)) - holoGlow.intensity) * Math.min(1, dt * 6);
-      holoCity.rotation.y = t * 0.35;
-      ring1.rotation.z = t * 0.6;
-      ring2.rotation.z = -t * 0.45;
       const pos = dust.geometry.attributes.position;
       for (let i = 0; i < dustCount; i++) {
         let y = pos.getY(i) + dt * 0.03;
