@@ -621,14 +621,12 @@ export function buildScene(container, opts = {}) {
     return g;
   }
   futureScreenRoot.add(labMonitor(0.98, 0.55, holoMain.texture, 0, 0.37, 0, 0));
-  futureScreenRoot.add(labMonitor(0.58, 0.34, holoSide.texture, -0.74, 0.31, -0.1, 0.55));
-  futureScreenRoot.add(labMonitor(0.58, 0.34, gisTex.texture, 0.74, 0.31, -0.1, -0.55));
-  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.12, 0.035), frameMat2);
-  stem.position.set(0, 0.05, -0.02);
+  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.145, 0.035), frameMat2);
+  stem.position.set(0, 0.032, -0.02);
   stem.castShadow = true;
   futureScreenRoot.add(stem);
-  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.015, 0.2), MAT.alu);
-  foot.position.set(0, -0.005, -0.02);
+  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.018, 0.2), MAT.alu);
+  foot.position.set(0, -0.012, -0.02);
   foot.castShadow = true;
   futureScreenRoot.add(foot);
   const paneLed = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.006, 0.01), MAT.accent);
@@ -683,7 +681,7 @@ export function buildScene(container, opts = {}) {
   }
   holoPanel(0.44, 0.31, holoSide.texture, -0.82, 0.02, 0.12, 0.5, 0.6);   // left: AI diagnostics
   holoPanel(0.42, 0.29, gisTex.texture, 0.84, 0.02, 0.12, -0.5, 1.0);     // right: GIS spatial panel
-  holoPanel(0.27, 0.135, auxScreen.texture, -0.5, -0.28, 0.16, 0.3, 1.4);   // aux: print status
+  holoPanel(0.27, 0.135, auxScreen.texture, 0.80, -0.70, 0.25, 0.3, 1.4);   // aux: print status (above printer)
 
   // floating holographic city model — the 3D engineering centrepiece (right side)
   const holoCity = new THREE.Group();
@@ -708,7 +706,7 @@ export function buildScene(container, opts = {}) {
   grid.rotation.x = -Math.PI / 2;
   grid.position.y = 0.001;
   holoCity.add(grid);
-  holoCity.position.set(0.42, -0.28, 0.16);
+  holoCity.position.set(1.16, -0.52, 0.18);
   holo.add(holoCity);
 
   holo.position.set(-0.12, DESK_Y + 0.98, -0.02);
@@ -817,25 +815,19 @@ export function buildScene(container, opts = {}) {
   /* ============================================================
    03 · DESK PROPS
    ============================================================ */
-  const kbGroup = new THREE.Group();
-  const kbBase = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.016, 0.21), MAT.cream);
-  kbBase.position.y = 0.008;
-  kbBase.castShadow = true;
-  kbGroup.add(kbBase);
+  /* virtual projection keyboard — projected from the console front edge */
   const kbTex = keyboardTex();
-  const kbTop = new THREE.Mesh(
-    new THREE.BoxGeometry(0.66, 0.004, 0.19),
-    new THREE.MeshStandardMaterial({
-      map: kbTex, roughness: 0.55, metalness: 0.1,
-      emissive: 0x803018, emissiveMap: kbTex, emissiveIntensity: 0.35,
-    })
+  const projKeys = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.66, 0.2),
+    new THREE.MeshBasicMaterial({ map: kbTex, transparent: true, opacity: 0.85, depthWrite: false })
   );
-  kbTop.rotation.x = -Math.PI / 2;
-  kbTop.position.y = 0.0175;
-  kbGroup.add(kbTop);
-  kbGroup.position.set(0.02, DESK_Y, 0.5);
-  kbGroup.rotation.x = 0.04;
-  scene.add(kbGroup);
+  projKeys.rotation.x = -Math.PI / 2;
+  projKeys.position.set(0.02, DESK_Y + 0.004, 0.5);
+  scene.add(projKeys);
+  // projector strip on the console front
+  const keyProj = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.008, 0.012), MAT.accent);
+  keyProj.position.set(0.02, DESK_Y + 0.012, 0.385);
+  scene.add(keyProj);
 
   const mouseMesh = new THREE.Mesh(
     new THREE.SphereGeometry(1, 20, 16),
@@ -854,7 +846,7 @@ export function buildScene(container, opts = {}) {
       new THREE.MeshStandardMaterial({ color: 0x25221E }), new THREE.MeshStandardMaterial({ color: 0x25221E }), new THREE.MeshStandardMaterial({ color: 0x25221E }),
     ]
   );
-  card.position.set(0.4, DESK_Y + 0.004, 0.56);
+  card.position.set(0.47, DESK_Y + 0.004, 0.60);
   card.rotation.y = 0.18;
   scene.add(card);
 
@@ -1178,7 +1170,7 @@ export function buildScene(container, opts = {}) {
   registerHotspot(futureScreenRoot, 'monitor');
   registerHotspot(holo, 'monitor');
   registerHotspot(console0, 'monitor');
-  registerHotspot(kbGroup, 'keyboard');
+  registerHotspot(projKeys, 'keyboard');
   registerHotspot(card, 'card');
   registerHotspot(phone, 'phone');
   registerHotspot(notepad, 'board');
@@ -1330,7 +1322,7 @@ export function buildScene(container, opts = {}) {
     if (activePtrs.size === 2 && sceneControlOn) {
       const pts = [...activePtrs.values()];
       const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      S.tRadius = THREE.MathUtils.clamp(S.tRadius - (d - pinchDist) * 0.004, 0.7, 11);
+      S.tRadius = THREE.MathUtils.clamp(S.tRadius - (d - pinchDist) * 0.004, 0.7, 7.5);
       pinchDist = d;
     }
   }, { passive: true });
@@ -1356,7 +1348,7 @@ export function buildScene(container, opts = {}) {
   el.addEventListener('wheel', (e) => {
     if (!sceneControlOn) return;
     e.preventDefault();
-    S.tRadius = THREE.MathUtils.clamp(S.tRadius + e.deltaY * 0.0016, 0.7, 11);
+    S.tRadius = THREE.MathUtils.clamp(S.tRadius + e.deltaY * 0.0016, 0.7, 7.5);
   }, { passive: false });
 
   /* ---------- resize ---------- */
