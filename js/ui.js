@@ -560,7 +560,7 @@ function initAwardController(root) {
 export function openAwardsWindow() {
   markVisited('awards');
   const rec = makeWindow({
-    title: state.lang === 'zh' ? '獲獎紀錄 AWARDS' : 'AWARDS — 60+ Honors',
+    title: state.lang === 'zh' ? '獲獎紀錄 AWARDS' : 'AWARDS — 70+ Honors',
     width: 'min(640px, 94%)',
     bodyHTML: awardTabsHTML(),
     bodyClass: 'wide',
